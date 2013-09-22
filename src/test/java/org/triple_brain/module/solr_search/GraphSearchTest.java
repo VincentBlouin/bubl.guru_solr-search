@@ -36,7 +36,6 @@ public class GraphSearchTest extends SearchRelatedTest {
     public void cant_search_in_vertices_of_another_user() throws Exception{
         indexGraph();
         indexVertex(pineApple);
-        
         JSONArray vertices = graphSearch.searchOnlyForOwnVerticesForAutoCompletionByLabel(
                 "vert",
                 user
@@ -124,7 +123,6 @@ public class GraphSearchTest extends SearchRelatedTest {
     public void searching_for_own_vertices_only_does_not_return_vertices_of_other_users(){
         vertexA.makePublic();
         indexGraph();
-        
         JSONArray vertices = graphSearch.searchOwnVerticesAndPublicOnesForAutoCompletionByLabel(
                 "vert",
                 user2

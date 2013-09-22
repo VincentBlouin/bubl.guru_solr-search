@@ -123,9 +123,11 @@ public class SearchRelatedTest extends AdaptableGraphComponentTest{
         graphIndexer.indexRelation(
                 vertexC.connectedEdges().iterator().next()
         );
+        graphIndexer.commit();
     }
 
     protected void indexVertex(Vertex vertex){
         graphIndexer.indexVertex(vertex);
+        graphIndexer.commit();
     }
 }

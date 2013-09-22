@@ -23,7 +23,7 @@ import static org.triple_brain.module.common_utils.Uris.encodeURL;
 /*
 * Copyright Mozilla Public License 1.1
 */
-public class SolrGraphIndexer implements GraphIndexer{
+public class SolrGraphIndexer implements GraphIndexer {
     @Inject
     WholeGraph wholeGraph;
 
@@ -48,28 +48,16 @@ public class SolrGraphIndexer implements GraphIndexer{
 
     @Override
     public void indexVertex(Vertex vertex) {
-        try {
-            SolrServer solrServer = searchUtils.getServer();
-            solrServer.add(
-                    vertexDocument(vertex)
-            );
-            solrServer.commit();
-        } catch (IOException | SolrServerException e) {
-            throw new RuntimeException(e);
-        }
+        addDocument(
+                vertexDocument(vertex)
+        );
     }
 
     @Override
     public void indexRelation(Edge edge) {
-        try {
-            SolrServer solrServer = searchUtils.getServer();
-            solrServer.add(
-                    edgeDocument(edge)
-            );
-            solrServer.commit();
-        } catch (IOException | SolrServerException e) {
-            throw new RuntimeException(e);
-        }
+        addDocument(
+                edgeDocument(edge)
+        );
     }
 
     @Override
@@ -81,7 +69,6 @@ public class SolrGraphIndexer implements GraphIndexer{
                             graphElement.uri()
                     )
             );
-            solrServer.commit();
         } catch (IOException | SolrServerException e) {
             throw new RuntimeException(e);
         }
@@ -105,9 +92,18 @@ public class SolrGraphIndexer implements GraphIndexer{
                         edge
                 )
         );
-        addDocumentsAndCommit(
+        addDocuments(
                 updatedDocuments
         );
+    }
+
+    @Override
+    public void commit() {
+        try {
+            searchUtils.getServer().commit();
+        } catch (SolrServerException | IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private SolrInputDocument edgeDocument(Edge edge) {
@@ -150,7 +146,8 @@ public class SolrGraphIndexer implements GraphIndexer{
             nbInCycle++;
             if (nbInCycle == INDEX_AFTER_HOW_NB_DOCUMENTS) {
                 totalIndexed += INDEX_AFTER_HOW_NB_DOCUMENTS;
-                addDocumentsAndCommit(vertexDocuments);
+                addDocuments(vertexDocuments);
+                commit();
                 System.out.println(
                         "Indexing vertices ... total indexed yet " + totalIndexed
                 );
@@ -158,7 +155,8 @@ public class SolrGraphIndexer implements GraphIndexer{
                 vertexDocuments = new HashSet<>();
             }
         }
-        addDocumentsAndCommit(vertexDocuments);
+        addDocuments(vertexDocuments);
+        commit();
         totalIndexed += nbInCycle;
         System.out.println(
                 "Indexing vertices ... total indexed " + totalIndexed
@@ -177,7 +175,8 @@ public class SolrGraphIndexer implements GraphIndexer{
             nbInCycle++;
             if (nbInCycle == INDEX_AFTER_HOW_NB_DOCUMENTS) {
                 totalIndexed += INDEX_AFTER_HOW_NB_DOCUMENTS;
-                addDocumentsAndCommit(edgesDocument);
+                addDocuments(edgesDocument);
+                commit();
                 System.out.println(
                         "Indexing edges ... total indexed yet " + totalIndexed
                 );
@@ -185,18 +184,29 @@ public class SolrGraphIndexer implements GraphIndexer{
                 edgesDocument = new HashSet<>();
             }
         }
-        addDocumentsAndCommit(edgesDocument);
+        addDocuments(edgesDocument);
+        commit();
         totalIndexed += nbInCycle;
         System.out.println(
                 "Indexing edges ... total indexed " + totalIndexed
         );
     }
 
-    private void addDocumentsAndCommit(Collection<SolrInputDocument> collection) {
+    private void addDocument(SolrInputDocument document) {
         try {
-            SolrServer solrServer = searchUtils.getServer();
-            solrServer.add(collection);
-            solrServer.commit();
+            searchUtils.getServer().add(
+                    document
+            );
+        } catch (SolrServerException | IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void addDocuments(Collection<SolrInputDocument> collection) {
+        try {
+            searchUtils.getServer().add(
+                    collection
+            );
         } catch (SolrServerException | IOException e) {
             throw new RuntimeException(e);
         }

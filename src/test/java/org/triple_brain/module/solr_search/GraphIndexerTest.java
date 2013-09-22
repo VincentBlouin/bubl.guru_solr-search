@@ -29,6 +29,7 @@ public class GraphIndexerTest extends SearchRelatedTest {
         SolrDocumentList documentList = queryVertex(vertexA);
         assertThat(documentList.size(), is(0));
         graphIndexer.indexVertex(vertexA);
+        graphIndexer.commit();
         documentList = queryVertex(vertexA);
         assertThat(documentList.size(), is(1));
         assertThat(
@@ -47,6 +48,7 @@ public class GraphIndexerTest extends SearchRelatedTest {
         );
         assertThat(results.length(), is(1));
         graphIndexer.deleteGraphElement(vertexA);
+        graphIndexer.commit();
         results = graphSearch.searchOwnVerticesAndPublicOnesForAutoCompletionByLabel(
                 "vertex azure",
                 user
@@ -68,6 +70,7 @@ public class GraphIndexerTest extends SearchRelatedTest {
         Edge edge = vertexA.connectedEdges().iterator().next();
         edge.label("updated label");
         graphIndexer.handleEdgeLabelUpdated(edge);
+        graphIndexer.commit();
         assertTrue(JsonUtils.containsString(
                 relationsNameOfVertex(vertexA),
                 "updated label"
