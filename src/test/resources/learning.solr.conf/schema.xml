@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<schema name="example" version="1.5">
+    <uniqueKey>id</uniqueKey>
+    <defaultSearchField>name</defaultSearchField>
+    <types>
+        <fieldType name="string" class="solr.StrField" sortMissingLast="true"/>
+        <fieldType name="double" class="solr.TrieDoubleField" precisionStep="0" positionIncrementGap="0"/>
+    </types>
+    <fields>
+        <field name="id" type="string" indexed="true" stored="true" required="true" />
+        <field name="name" type="string" indexed="true" stored="true"/>
+        <field name="price" type="double" indexed="true" stored="true"/>
+    </fields>
+</schema>
