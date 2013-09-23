@@ -7,21 +7,27 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.core.CoreContainer;
 import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONObject;
 import org.triple_brain.module.model.User;
 import org.triple_brain.module.search.GraphSearch;
 import org.triple_brain.module.solr_search.json.SearchJsonConverter;
 
+import java.net.URI;
 import java.util.HashSet;
 import java.util.StringTokenizer;
+
+import static org.triple_brain.module.common_utils.Uris.encodeURL;
 
 /*
 * Copyright Mozilla Public License 1.1
 */
-public class SolrGraphSearch implements GraphSearch{
+public class SolrGraphSearch implements GraphSearch {
     private enum SearchParam {
         ONLY_OWN_VERTICES,
         IS_VERTEX
-    };
+    }
+
+    ;
 
     private SearchUtils searchUtils;
 
@@ -49,7 +55,7 @@ public class SolrGraphSearch implements GraphSearch{
         return searchForGraphElementForAutoCompletionByLabelUsingSearchParams(
                 label,
                 user,
-                new HashSet<SearchParam>(){{
+                new HashSet<SearchParam>() {{
                     add(SearchParam.IS_VERTEX);
                     add(SearchParam.ONLY_OWN_VERTICES);
                 }}
@@ -63,6 +69,25 @@ public class SolrGraphSearch implements GraphSearch{
                 user,
                 new HashSet<SearchParam>()
         );
+    }
+
+    @Override
+    public JSONObject getByUri(URI uri, User user) {
+        try {
+            SolrServer solrServer = searchUtils.getServer();
+            SolrQuery solrQuery = new SolrQuery();
+            solrQuery.setQuery(
+                    "uri:" + encodeURL(uri) + " AND " +
+                            "(owner_username:" + user.username() +
+                            " OR " + "is_public:true)"
+            );
+            QueryResponse queryResponse = solrServer.query(solrQuery);
+            return SearchJsonConverter.documentToJson(
+                    queryResponse.getResults().get(0)
+            );
+        } catch (SolrServerException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private JSONArray searchForGraphElementForAutoCompletionByLabelUsingSearchParams(String label, User user, HashSet<SearchParam> searchParams) {

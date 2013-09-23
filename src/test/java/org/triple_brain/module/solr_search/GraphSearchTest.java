@@ -5,6 +5,7 @@ import org.codehaus.jettison.json.JSONObject;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.triple_brain.module.common_utils.JsonUtils;
+import org.triple_brain.module.model.json.FriendlyResourceJson;
 import org.triple_brain.module.model.json.graph.VertexJson;
 import org.triple_brain.module.solr_search.json.SearchJsonConverter;
 
@@ -52,7 +53,6 @@ public class GraphSearchTest extends SearchRelatedTest {
     public void vertex_note_can_be_retrieved_from_search()throws Exception{
         vertexA.comment("A description");
         indexGraph();
-        
         JSONArray searchResults = graphSearch.searchOnlyForOwnVerticesForAutoCompletionByLabel(
                 vertexA.label(),
                 user
@@ -64,7 +64,6 @@ public class GraphSearchTest extends SearchRelatedTest {
     @Test
     public void vertex_relations_name_can_be_retrieved()throws Exception{
         indexGraph();
-        
         JSONArray searchResults = graphSearch.searchOnlyForOwnVerticesForAutoCompletionByLabel(
                 vertexA.label(),
                 user
@@ -82,7 +81,6 @@ public class GraphSearchTest extends SearchRelatedTest {
     @Test
     public void incoming_and_outgoing_vertex_relations_name_can_be_retrieved()throws Exception{
         indexGraph();
-        
         JSONArray searchResults = graphSearch.searchOnlyForOwnVerticesForAutoCompletionByLabel(
                 vertexB.label(),
                 user
@@ -104,7 +102,6 @@ public class GraphSearchTest extends SearchRelatedTest {
     @Test
     public void can_search_for_other_users_public_vertices(){
         indexGraph();
-        
         JSONArray vertices = graphSearch.searchOwnVerticesAndPublicOnesForAutoCompletionByLabel(
                 "vert",
                 user2
@@ -138,7 +135,6 @@ public class GraphSearchTest extends SearchRelatedTest {
     @Test
     public void search_is_case_insensitive(){
         indexGraph();
-        
         JSONArray vertices = graphSearch.searchOwnVerticesAndPublicOnesForAutoCompletionByLabel(
                 "vert",
                 user
@@ -155,7 +151,6 @@ public class GraphSearchTest extends SearchRelatedTest {
     public void case_is_preserved_when_getting_label(){
         vertexA.label("Vertex Azure");
         indexGraph();
-        
         JSONArray vertices = graphSearch.searchOwnVerticesAndPublicOnesForAutoCompletionByLabel(
                 "vertex azure",
                 user
@@ -182,18 +177,26 @@ public class GraphSearchTest extends SearchRelatedTest {
     }
 
     @Test
-    @Ignore(
-            "I dont know why sometimes it works, sometimes it dont. " +
-            "Unignore when using Suggestion from solr for autocompletion"
-    )
     public void can_search_relations(){
         indexGraph();
-        
         JSONArray results = graphSearch.searchRelationsForAutoCompletionByLabel(
                 "between vert",
                 user
         );
         assertThat(results.length(), is(2));
+    }
+
+    @Test
+    public void can_search_by_uri(){
+        indexGraph();
+        JSONObject result = graphSearch.getByUri(
+                vertexA.uri(),
+                user
+        );
+        assertThat(
+                result.optString(FriendlyResourceJson.LABEL),
+                is(vertexA.label())
+        );
     }
 
     @Test
