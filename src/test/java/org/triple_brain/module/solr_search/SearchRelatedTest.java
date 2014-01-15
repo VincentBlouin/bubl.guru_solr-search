@@ -11,9 +11,10 @@ import org.junit.BeforeClass;
 import org.triple_brain.module.model.User;
 import org.triple_brain.module.model.graph.AdaptableGraphComponentTest;
 import org.triple_brain.module.model.graph.GraphFactory;
-import org.triple_brain.module.model.graph.Vertex;
+import org.triple_brain.module.model.graph.vertex.Vertex;
 import org.triple_brain.module.model.graph.scenarios.TestScenarios;
 import org.triple_brain.module.model.graph.scenarios.VerticesCalledABAndC;
+import org.triple_brain.module.model.graph.vertex.VertexOperator;
 import org.triple_brain.module.search.GraphIndexer;
 import org.triple_brain.module.search.GraphSearch;
 
@@ -36,10 +37,10 @@ public class SearchRelatedTest extends AdaptableGraphComponentTest{
 
     protected SearchUtils searchUtils;
 
-    protected Vertex vertexA;
-    protected Vertex vertexB;
-    protected Vertex vertexC;
-    protected Vertex pineApple;
+    protected VertexOperator vertexA;
+    protected VertexOperator vertexB;
+    protected VertexOperator vertexC;
+    protected VertexOperator pineApple;
     protected User user;
     protected User user2;
     protected Vertex vertexOfUser2;
@@ -126,7 +127,7 @@ public class SearchRelatedTest extends AdaptableGraphComponentTest{
         graphIndexer.commit();
     }
 
-    protected void indexVertex(Vertex vertex){
+    protected void indexVertex(VertexOperator vertex){
         graphIndexer.indexVertex(vertex);
         graphIndexer.commit();
     }

@@ -7,9 +7,10 @@ import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.CoreContainer;
 import org.triple_brain.module.model.FriendlyResource;
 import org.triple_brain.module.model.WholeGraph;
-import org.triple_brain.module.model.graph.Edge;
 import org.triple_brain.module.model.graph.GraphElement;
-import org.triple_brain.module.model.graph.Vertex;
+import org.triple_brain.module.model.graph.edge.Edge;
+import org.triple_brain.module.model.graph.edge.EdgeOperator;
+import org.triple_brain.module.model.graph.vertex.VertexOperator;
 import org.triple_brain.module.search.GraphIndexer;
 
 import java.io.IOException;
@@ -47,7 +48,7 @@ public class SolrGraphIndexer implements GraphIndexer {
     }
 
     @Override
-    public void indexVertex(Vertex vertex) {
+    public void indexVertex(VertexOperator vertex) {
         addDocument(
                 vertexDocument(vertex)
         );
@@ -79,12 +80,12 @@ public class SolrGraphIndexer implements GraphIndexer {
         Set<SolrInputDocument> updatedDocuments = new HashSet<>();
         updatedDocuments.add(
                 vertexDocument(
-                        edge.sourceVertex()
+                        (VertexOperator) edge.sourceVertex()
                 )
         );
         updatedDocuments.add(
                 vertexDocument(
-                        edge.destinationVertex()
+                        (VertexOperator) edge.destinationVertex()
                 )
         );
         updatedDocuments.add(
@@ -120,7 +121,7 @@ public class SolrGraphIndexer implements GraphIndexer {
         return document;
     }
 
-    private SolrInputDocument vertexDocument(Vertex vertex) {
+    private SolrInputDocument vertexDocument(VertexOperator vertex) {
         SolrInputDocument document = graphElementToDocument(vertex);
         document.addField("is_vertex", true);
         document.addField("is_public", vertex.isPublic());
@@ -135,7 +136,7 @@ public class SolrGraphIndexer implements GraphIndexer {
     }
 
     private void indexAllVertices() {
-        Iterator<Vertex> vertexIt = wholeGraph.getAllVertices();
+        Iterator<VertexOperator> vertexIt = wholeGraph.getAllVertices();
         Set<SolrInputDocument> vertexDocuments = new HashSet<>();
         int totalIndexed = 0;
         int nbInCycle = 0;
@@ -164,7 +165,7 @@ public class SolrGraphIndexer implements GraphIndexer {
     }
 
     private void indexAllEdges() {
-        Iterator<Edge> edgeIt = wholeGraph.getAllEdges();
+        Iterator<EdgeOperator> edgeIt = wholeGraph.getAllEdges();
         Set<SolrInputDocument> edgesDocument = new HashSet<>();
         int totalIndexed = 0;
         int nbInCycle = 0;

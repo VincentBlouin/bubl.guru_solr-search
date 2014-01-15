@@ -9,8 +9,8 @@ import org.codehaus.jettison.json.JSONObject;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.triple_brain.module.common_utils.JsonUtils;
-import org.triple_brain.module.model.graph.Edge;
-import org.triple_brain.module.model.graph.Vertex;
+import org.triple_brain.module.model.graph.edge.Edge;
+import org.triple_brain.module.model.graph.vertex.Vertex;
 import org.triple_brain.module.search.GraphSearch;
 import org.triple_brain.module.solr_search.json.SearchJsonConverter;
 
