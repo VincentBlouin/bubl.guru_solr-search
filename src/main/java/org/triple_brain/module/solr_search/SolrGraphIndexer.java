@@ -76,16 +76,16 @@ public class SolrGraphIndexer implements GraphIndexer {
     }
 
     @Override
-    public void handleEdgeLabelUpdated(Edge edge) {
+    public void handleEdgeLabelUpdated(EdgeOperator edge) {
         Set<SolrInputDocument> updatedDocuments = new HashSet<>();
         updatedDocuments.add(
                 vertexDocument(
-                        (VertexOperator) edge.sourceVertex()
+                        edge.sourceVertex()
                 )
         );
         updatedDocuments.add(
                 vertexDocument(
-                        (VertexOperator) edge.destinationVertex()
+                        edge.destinationVertex()
                 )
         );
         updatedDocuments.add(
