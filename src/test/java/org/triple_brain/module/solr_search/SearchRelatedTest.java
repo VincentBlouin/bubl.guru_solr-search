@@ -1,5 +1,6 @@
 package org.triple_brain.module.solr_search;
 
+import com.google.gson.Gson;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -36,6 +37,8 @@ public class SearchRelatedTest extends AdaptableGraphComponentTest{
     protected TestScenarios testScenarios;
 
     protected SearchUtils searchUtils;
+
+    protected Gson gson = new Gson();
 
     protected VertexOperator vertexA;
     protected VertexOperator vertexB;

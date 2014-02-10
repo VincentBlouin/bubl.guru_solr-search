@@ -1,201 +1,202 @@
 package org.triple_brain.module.solr_search;
 
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONObject;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.triple_brain.module.common_utils.JsonUtils;
-import org.triple_brain.module.model.json.FriendlyResourceJson;
-import org.triple_brain.module.model.json.graph.VertexJson;
-import org.triple_brain.module.solr_search.json.SearchJsonConverter;
+import org.triple_brain.module.model.graph.GraphElement;
+import org.triple_brain.module.model.graph.edge.Edge;
+import org.triple_brain.module.search.EdgeSearchResult;
+import org.triple_brain.module.search.GraphElementSearchResult;
+import org.triple_brain.module.search.VertexSearchResult;
+
+import java.util.List;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.*;
-import static org.triple_brain.module.model.json.FriendlyResourceJson.COMMENT;
-import static org.triple_brain.module.model.json.graph.VertexJson.LABEL;
+
 /*
 * Copyright Mozilla Public License 1.1
 */
 public class GraphSearchTest extends SearchRelatedTest {
 
     @Test
-    public void can_search_vertices_for_auto_completion() throws Exception{
+    public void can_search_vertices_for_auto_completion() throws Exception {
         indexGraph();
-        indexVertex(pineApple);        
-        JSONArray vertices;
+        indexVertex(pineApple);
+        List<VertexSearchResult> vertices;
         vertices = graphSearch.searchOnlyForOwnVerticesForAutoCompletionByLabel("vert", user);
-        assertThat(vertices.length(), is(3));
+        assertThat(vertices.size(), is(3));
         vertices = graphSearch.searchOnlyForOwnVerticesForAutoCompletionByLabel("vertex Cad", user);
-        assertThat(vertices.length(), is(1));
-        JSONObject firstVertex = vertices.getJSONObject(0);
-        assertThat(firstVertex.getString(LABEL), is("vertex Cadeau"));
+        assertThat(vertices.size(), is(1));
+        GraphElement firstVertex = vertices.get(0).getGraphElementSearchResult().getGraphElement();
+        assertThat(firstVertex.label(), is("vertex Cadeau"));
         vertices = graphSearch.searchOnlyForOwnVerticesForAutoCompletionByLabel("pine A", user);
-        assertThat(vertices.length(), is(1));
+        assertThat(vertices.size(), is(1));
     }
 
     @Test
-    public void cant_search_in_vertices_of_another_user() throws Exception{
+    public void cant_search_in_vertices_of_another_user() throws Exception {
         indexGraph();
         indexVertex(pineApple);
-        JSONArray vertices = graphSearch.searchOnlyForOwnVerticesForAutoCompletionByLabel(
+        List<VertexSearchResult> vertices = graphSearch.searchOnlyForOwnVerticesForAutoCompletionByLabel(
                 "vert",
                 user
         );
-        assertTrue(vertices.length() > 0);
+        assertTrue(vertices.size() > 0);
         vertices = graphSearch.searchOnlyForOwnVerticesForAutoCompletionByLabel(
                 "vert",
                 user2
         );
-        assertFalse(vertices.length() > 0);
+        assertFalse(vertices.size() > 0);
     }
 
     @Test
-    public void vertex_note_can_be_retrieved_from_search()throws Exception{
+    public void vertex_note_can_be_retrieved_from_search() throws Exception {
         vertexA.comment("A description");
         indexGraph();
-        JSONArray searchResults = graphSearch.searchOnlyForOwnVerticesForAutoCompletionByLabel(
+        List<VertexSearchResult> searchResults = graphSearch.searchOnlyForOwnVerticesForAutoCompletionByLabel(
                 vertexA.label(),
                 user
         );
-        String comment = searchResults.getJSONObject(0).getString(COMMENT);
-        assertThat(comment, is("A description"));
+        GraphElement vertex = searchResults.get(0).getGraphElementSearchResult().getGraphElement();
+        assertThat(
+                vertex.comment(),
+                is("A description")
+        );
     }
 
     @Test
-    public void vertex_relations_name_can_be_retrieved()throws Exception{
+    public void vertex_relations_name_can_be_retrieved() throws Exception {
         indexGraph();
-        JSONArray searchResults = graphSearch.searchOnlyForOwnVerticesForAutoCompletionByLabel(
+        List<VertexSearchResult> searchResults = graphSearch.searchOnlyForOwnVerticesForAutoCompletionByLabel(
                 vertexA.label(),
                 user
         );
-        JSONObject result = searchResults.getJSONObject(0);
-        JSONArray relationsName = result.getJSONArray(
-                SearchJsonConverter.RELATIONS_NAME
-        );
-        assertTrue(JsonUtils.containsString(
-                relationsName,
-                "between vertex A and vertex B"
-        ));
+        VertexSearchResult result = searchResults.get(0);
+        assertTrue(
+                result.getRelationsName().contains(
+                        "between vertex A and vertex B"
+                ));
     }
 
     @Test
-    public void incoming_and_outgoing_vertex_relations_name_can_be_retrieved()throws Exception{
+    public void incoming_and_outgoing_vertex_relations_name_can_be_retrieved() throws Exception {
         indexGraph();
-        JSONArray searchResults = graphSearch.searchOnlyForOwnVerticesForAutoCompletionByLabel(
+        List<VertexSearchResult> searchResults = graphSearch.searchOnlyForOwnVerticesForAutoCompletionByLabel(
                 vertexB.label(),
                 user
         );
-        JSONObject result = searchResults.getJSONObject(0);
-        JSONArray relationsName = result.getJSONArray(
-                SearchJsonConverter.RELATIONS_NAME
+        VertexSearchResult result = searchResults.get(0);
+        assertTrue(
+                result.getRelationsName().contains(
+                        "between vertex A and vertex B"
+                )
         );
-        assertTrue(JsonUtils.containsString(
-                relationsName,
-                "between vertex A and vertex B"
-        ));
-        assertTrue(JsonUtils.containsString(
-                relationsName,
+        assertTrue(
+                result.getRelationsName().contains(
                 "between vertex B and vertex C"
         ));
     }
 
     @Test
-    public void can_search_for_other_users_public_vertices(){
+    public void can_search_for_other_users_public_vertices() {
         indexGraph();
-        JSONArray vertices = graphSearch.searchOwnVerticesAndPublicOnesForAutoCompletionByLabel(
+        List<VertexSearchResult> vertices = graphSearch.searchOwnVerticesAndPublicOnesForAutoCompletionByLabel(
                 "vert",
                 user2
         );
-        assertFalse(vertices.length() > 0);
+        assertFalse(vertices.size() > 0);
         vertexA.makePublic();
         indexVertex(vertexA);
         vertices = graphSearch.searchOwnVerticesAndPublicOnesForAutoCompletionByLabel(
                 "vert",
                 user2
         );
-        assertTrue(vertices.length() > 0);
+        assertTrue(vertices.size() > 0);
     }
 
     @Test
-    public void searching_for_own_vertices_only_does_not_return_vertices_of_other_users(){
+    public void searching_for_own_vertices_only_does_not_return_vertices_of_other_users() {
         vertexA.makePublic();
         indexGraph();
-        JSONArray vertices = graphSearch.searchOwnVerticesAndPublicOnesForAutoCompletionByLabel(
+        List<VertexSearchResult> vertices = graphSearch.searchOwnVerticesAndPublicOnesForAutoCompletionByLabel(
                 "vert",
                 user2
         );
-        assertTrue(vertices.length() > 0);
+        assertTrue(vertices.size() > 0);
         vertices = graphSearch.searchOnlyForOwnVerticesForAutoCompletionByLabel(
                 "vert",
                 user2
         );
-        assertFalse(vertices.length() > 0);
+        assertFalse(vertices.size() > 0);
     }
 
     @Test
-    public void search_is_case_insensitive(){
+    public void search_is_case_insensitive() {
         indexGraph();
-        JSONArray vertices = graphSearch.searchOwnVerticesAndPublicOnesForAutoCompletionByLabel(
+        List<VertexSearchResult> vertices = graphSearch.searchOwnVerticesAndPublicOnesForAutoCompletionByLabel(
                 "vert",
                 user
         );
-        assertTrue(vertices.length() > 0);
+        assertTrue(vertices.size() > 0);
         vertices = graphSearch.searchOwnVerticesAndPublicOnesForAutoCompletionByLabel(
                 "Vert",
                 user
         );
-        assertTrue(vertices.length() > 0);
+        assertTrue(vertices.size() > 0);
     }
 
     @Test
-    public void case_is_preserved_when_getting_label(){
+    public void case_is_preserved_when_getting_label() {
         vertexA.label("Vertex Azure");
         indexGraph();
-        JSONArray vertices = graphSearch.searchOwnVerticesAndPublicOnesForAutoCompletionByLabel(
+        List<VertexSearchResult> vertices = graphSearch.searchOwnVerticesAndPublicOnesForAutoCompletionByLabel(
                 "vertex azure",
                 user
         );
-        JSONObject vertexAAsJson = vertices.optJSONObject(0);
+        GraphElement vertex = vertices.get(0).getGraphElementSearchResult().getGraphElement();
         assertThat(
-                vertexAAsJson.optString(
-                        VertexJson.LABEL
-                ),
+                vertex.label(),
                 is("Vertex Azure")
         );
     }
 
     @Test
-    public void relation_source_and_destination_vertex_uri_are_included_in_result(){
-        indexGraph();        
-        JSONArray relations = graphSearch.searchRelationsForAutoCompletionByLabel(
+    public void relation_source_and_destination_vertex_uri_are_included_in_result() {
+        indexGraph();
+        List<EdgeSearchResult> relations = graphSearch.searchRelationsForAutoCompletionByLabel(
                 "between vert",
                 user
         );
-        JSONObject relation = relations.optJSONObject(0);
-        assertTrue(relation.has("source_vertex_uri"));
-        assertTrue(relation.has("destination_vertex_uri"));
+        Edge edge = relations.get(0).getEdge();
+        assertFalse(
+                null == edge.sourceVertex().uri()
+        );
+        assertFalse(
+                null == edge.destinationVertex().uri()
+        );
     }
 
     @Test
     @Ignore("I dont know why but this test fails sometimes and succeeds in other times")
-    public void can_search_relations(){
+    public void can_search_relations() {
         indexGraph();
-        JSONArray results = graphSearch.searchRelationsForAutoCompletionByLabel(
+        List<EdgeSearchResult> results = graphSearch.searchRelationsForAutoCompletionByLabel(
                 "between vert",
                 user
         );
-        assertThat(results.length(), is(2));
+        assertThat(results.size(), is(2));
     }
 
     @Test
-    public void can_search_by_uri(){
+    public void can_search_by_uri() {
         indexGraph();
-        JSONObject result = graphSearch.getByUri(
+        GraphElementSearchResult searchResult = graphSearch.getByUri(
                 vertexA.uri(),
                 user
         );
+        GraphElement vertex = searchResult.getGraphElementSearchResult().getGraphElement();
         assertThat(
-                result.optString(FriendlyResourceJson.LABEL),
+                vertex.label(),
                 is(vertexA.label())
         );
     }
@@ -203,7 +204,7 @@ public class GraphSearchTest extends SearchRelatedTest {
     @Test
     @Ignore
     //todo
-    public void search_goes_beyond_two_first_words(){
+    public void search_goes_beyond_two_first_words() {
         vertexA.label(
                 "bonjour monsieur proute"
         );
@@ -214,11 +215,11 @@ public class GraphSearchTest extends SearchRelatedTest {
                 "bonjour monsieur avion"
         );
         indexGraph();
-        
-        JSONArray vertices = graphSearch.searchOwnVerticesAndPublicOnesForAutoCompletionByLabel(
+
+        List<VertexSearchResult> vertices = graphSearch.searchOwnVerticesAndPublicOnesForAutoCompletionByLabel(
                 "bonjour monsieur pr",
                 user
         );
-        assertThat(vertices.length(), is(2));
+        assertThat(vertices.size(), is(2));
     }
 }

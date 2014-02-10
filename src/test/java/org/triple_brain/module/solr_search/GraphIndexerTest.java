@@ -3,16 +3,14 @@ package org.triple_brain.module.solr_search;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.triple_brain.module.common_utils.JsonUtils;
 import org.triple_brain.module.model.graph.edge.EdgeOperator;
 import org.triple_brain.module.model.graph.vertex.Vertex;
 import org.triple_brain.module.search.GraphSearch;
-import org.triple_brain.module.solr_search.json.SearchJsonConverter;
+import org.triple_brain.module.search.VertexSearchResult;
+
+import java.util.List;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.*;
@@ -42,43 +40,47 @@ public class GraphIndexerTest extends SearchRelatedTest {
     public void can_remove_graph_element_from_index() {
         indexGraph();
         GraphSearch graphSearch = SolrGraphSearch.withCoreContainer(coreContainer);
-        JSONArray results = graphSearch.searchOwnVerticesAndPublicOnesForAutoCompletionByLabel(
+        List<VertexSearchResult> results = graphSearch.searchOwnVerticesAndPublicOnesForAutoCompletionByLabel(
                 "vertex azure",
                 user
         );
-        assertThat(results.length(), is(1));
+        assertThat(results.size(), is(1));
         graphIndexer.deleteGraphElement(vertexA);
         graphIndexer.commit();
         results = graphSearch.searchOwnVerticesAndPublicOnesForAutoCompletionByLabel(
                 "vertex azure",
                 user
         );
-        assertThat(results.length(), is(0));
+        assertThat(results.size(), is(0));
     }
 
     @Test
     public void updating_edge_label_updates_connected_vertices_relations_name() throws Exception {
         indexGraph();
-        assertFalse(JsonUtils.containsString(
-                relationsNameOfVertex(vertexA),
-                "updated label"
-        ));
-        assertFalse(JsonUtils.containsString(
-                relationsNameOfVertex(vertexB),
-                "updated label"
-        ));
+        assertFalse(
+                relationsNameOfVertex(vertexA).contains(
+                        "updated label"
+                )
+        );
+        assertFalse(
+                relationsNameOfVertex(vertexB).contains(
+                        "updated label"
+                )
+        );
         EdgeOperator edge = vertexA.connectedEdges().iterator().next();
         edge.label("updated label");
         graphIndexer.handleEdgeLabelUpdated(edge);
         graphIndexer.commit();
-        assertTrue(JsonUtils.containsString(
-                relationsNameOfVertex(vertexA),
-                "updated label"
-        ));
-        assertTrue(JsonUtils.containsString(
-                relationsNameOfVertex(vertexB),
-                "updated label"
-        ));
+        assertTrue(
+            relationsNameOfVertex(vertexA).contains(
+                    "updated label"
+            )
+        );
+        assertTrue(
+            relationsNameOfVertex(vertexB).contains(
+                    "updated label"
+            )
+        );
     }
 
     @Test
@@ -90,12 +92,12 @@ public class GraphIndexerTest extends SearchRelatedTest {
     public void indexing_graph_element_doesnt_erase_vertex_specific_fields() {
         indexGraph();
         GraphSearch graphSearch = SolrGraphSearch.withCoreContainer(coreContainer);
-        JSONArray vertexASearchResults = graphSearch.searchOnlyForOwnVerticesForAutoCompletionByLabel(
+        List<VertexSearchResult> vertexASearchResults = graphSearch.searchOnlyForOwnVerticesForAutoCompletionByLabel(
                 "vertex Azure",
                 user
         );
         assertThat(
-                vertexASearchResults.length(), is(1)
+                vertexASearchResults.size(), is(1)
         );
         //todo uncomment when lucene4 be integrated in noe4j for now it conflicts with solr when I upgrade solr to version 4
 //        graphIndexer().updateGraphElementIndex(vertexA, user);
@@ -104,7 +106,7 @@ public class GraphIndexerTest extends SearchRelatedTest {
                 user
         );
         assertThat(
-                vertexASearchResults.length(), is(1)
+                vertexASearchResults.size(), is(1)
         );
     }
 
@@ -120,19 +122,13 @@ public class GraphIndexerTest extends SearchRelatedTest {
         );
     }
 
-    private JSONArray relationsNameOfVertex(Vertex vertex) {
-        JSONArray searchResults = graphSearch.searchOnlyForOwnVerticesForAutoCompletionByLabel(
+    private List<String> relationsNameOfVertex(Vertex vertex) {
+        List<VertexSearchResult> searchResults = graphSearch.searchOnlyForOwnVerticesForAutoCompletionByLabel(
                 vertex.label(),
                 user
         );
-        try {
-            JSONObject result = searchResults.getJSONObject(0);
-            return result.getJSONArray(
-                    SearchJsonConverter.RELATIONS_NAME
-            );
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
+        VertexSearchResult result = searchResults.iterator().next();
+        return result.getRelationsName();
     }
 
 
