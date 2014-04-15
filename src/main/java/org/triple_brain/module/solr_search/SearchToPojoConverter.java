@@ -12,6 +12,7 @@ import org.triple_brain.module.search.EdgeSearchResult;
 import org.triple_brain.module.search.GraphElementSearchResult;
 import org.triple_brain.module.search.VertexSearchResult;
 
+import java.net.URI;
 import java.util.*;
 
 import static org.triple_brain.module.common_utils.Uris.decodeUrl;
@@ -101,8 +102,8 @@ public class SearchToPojoConverter {
         return (ArrayList<String>) document.get("relation_name");
     }
 
-    private static Set<FriendlyResourcePojo> buildIdentifications(SolrDocument document) {
-        Set<FriendlyResourcePojo> identifications = new HashSet<>();
+    private static Map<URI, FriendlyResourcePojo> buildIdentifications(SolrDocument document) {
+        Map<URI, FriendlyResourcePojo> identifications = new HashMap<>();
         if (!document.containsKey("identification")) {
             return identifications;
         }
@@ -110,11 +111,12 @@ public class SearchToPojoConverter {
                 "identification"
         );
         for (String identification : identificationsUris) {
-            identifications.add(
+            URI uri = Uris.get(decodeUrl(identification));
+            identifications.put(
+                    uri,
                     new FriendlyResourcePojo(
-                            Uris.get(decodeUrl(identification))
+                            uri
                     )
-
             );
         }
         return identifications;

@@ -10,10 +10,12 @@ import org.triple_brain.module.model.WholeGraph;
 import org.triple_brain.module.model.graph.GraphElement;
 import org.triple_brain.module.model.graph.edge.Edge;
 import org.triple_brain.module.model.graph.edge.EdgeOperator;
+import org.triple_brain.module.model.graph.vertex.VertexInSubGraphOperator;
 import org.triple_brain.module.model.graph.vertex.VertexOperator;
 import org.triple_brain.module.search.GraphIndexer;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -136,7 +138,7 @@ public class SolrGraphIndexer implements GraphIndexer {
     }
 
     private void indexAllVertices() {
-        Iterator<VertexOperator> vertexIt = wholeGraph.getAllVertices();
+        Iterator<VertexInSubGraphOperator> vertexIt = wholeGraph.getAllVertices();
         Set<SolrInputDocument> vertexDocuments = new HashSet<>();
         int totalIndexed = 0;
         int nbInCycle = 0;
@@ -219,10 +221,10 @@ public class SolrGraphIndexer implements GraphIndexer {
         document.addField("label", graphElement.label());
         document.addField("label_lower_case", graphElement.label().toLowerCase());
         document.addField("owner_username", graphElement.ownerUsername());
-        for (FriendlyResource identification : graphElement.getIdentifications()) {
+        for (URI identificationUri : graphElement.getIdentifications().keySet()) {
             document.addField(
                     "identification",
-                    encodeURL(identification.uri())
+                    encodeURL(identificationUri)
             );
         }
         return document;

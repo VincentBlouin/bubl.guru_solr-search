@@ -13,9 +13,9 @@ import org.triple_brain.module.model.User;
 import org.triple_brain.module.model.graph.AdaptableGraphComponentTest;
 import org.triple_brain.module.model.graph.GraphFactory;
 import org.triple_brain.module.model.graph.vertex.Vertex;
-import org.triple_brain.module.model.graph.scenarios.TestScenarios;
-import org.triple_brain.module.model.graph.scenarios.VerticesCalledABAndC;
 import org.triple_brain.module.model.graph.vertex.VertexOperator;
+import org.triple_brain.module.model.test.scenarios.TestScenarios;
+import org.triple_brain.module.model.test.scenarios.VerticesCalledABAndC;
 import org.triple_brain.module.search.GraphIndexer;
 import org.triple_brain.module.search.GraphSearch;
 
