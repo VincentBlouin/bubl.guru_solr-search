@@ -6,6 +6,7 @@ import org.triple_brain.module.common_utils.Uris;
 import org.triple_brain.module.model.Image;
 import org.triple_brain.module.model.graph.FriendlyResourcePojo;
 import org.triple_brain.module.model.graph.GraphElementPojo;
+import org.triple_brain.module.model.graph.IdentificationPojo;
 import org.triple_brain.module.model.graph.edge.EdgePojo;
 import org.triple_brain.module.model.graph.vertex.VertexInSubGraphPojo;
 import org.triple_brain.module.search.EdgeSearchResult;
@@ -88,7 +89,7 @@ public class SearchToPojoConverter {
                 Uris.get(decodeUrl((String) document.get("uri"))),
                 map.containsKey("label") ? document.get("label").toString() : "",
                 new HashSet<Image>(),
-                map.containsKey("comment") ? document.get("comment").toString(): "",
+                map.containsKey("comment") ? document.get("comment").toString() : "",
                 creationDate,
                 lastModificationDate
         );
@@ -102,8 +103,8 @@ public class SearchToPojoConverter {
         return (ArrayList<String>) document.get("relation_name");
     }
 
-    private static Map<URI, FriendlyResourcePojo> buildIdentifications(SolrDocument document) {
-        Map<URI, FriendlyResourcePojo> identifications = new HashMap<>();
+    private static Map<URI, IdentificationPojo> buildIdentifications(SolrDocument document) {
+        Map<URI, IdentificationPojo> identifications = new HashMap<>();
         if (!document.containsKey("identification")) {
             return identifications;
         }
@@ -114,8 +115,10 @@ public class SearchToPojoConverter {
             URI uri = Uris.get(decodeUrl(identification));
             identifications.put(
                     uri,
-                    new FriendlyResourcePojo(
-                            uri
+                    new IdentificationPojo(
+                            new FriendlyResourcePojo(
+                                    uri
+                            )
                     )
             );
         }
