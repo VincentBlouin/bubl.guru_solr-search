@@ -1,3 +1,7 @@
+/*
+ * Copyright Vincent Blouin under the Mozilla Public License 1.1
+ */
+
 package org.triple_brain.module.solr_search;
 
 import com.google.gson.Gson;
@@ -12,6 +16,8 @@ import org.junit.BeforeClass;
 import org.triple_brain.module.model.User;
 import org.triple_brain.module.model.graph.AdaptableGraphComponentTest;
 import org.triple_brain.module.model.graph.GraphFactory;
+import org.triple_brain.module.model.graph.UserGraph;
+import org.triple_brain.module.model.graph.schema.SchemaOperator;
 import org.triple_brain.module.model.graph.vertex.Vertex;
 import org.triple_brain.module.model.graph.vertex.VertexOperator;
 import org.triple_brain.module.model.test.scenarios.TestScenarios;
@@ -22,9 +28,6 @@ import org.triple_brain.module.search.GraphSearch;
 import javax.inject.Inject;
 import java.io.File;
 
-/*
-* Copyright Mozilla Public License 1.1
-*/
 public class SearchRelatedTest extends AdaptableGraphComponentTest{
     @Inject
     GraphFactory graphMaker;
@@ -37,8 +40,6 @@ public class SearchRelatedTest extends AdaptableGraphComponentTest{
     protected TestScenarios testScenarios;
 
     protected SearchUtils searchUtils;
-
-    protected Gson gson = new Gson();
 
     protected VertexOperator vertexA;
     protected VertexOperator vertexB;
@@ -133,5 +134,10 @@ public class SearchRelatedTest extends AdaptableGraphComponentTest{
     protected void indexVertex(VertexOperator vertex){
         graphIndexer.indexVertex(vertex);
         graphIndexer.commit();
+    }
+    protected SchemaOperator createSchema(User user) {
+        return userGraph.schemaOperatorWithUri(
+                graphMaker.loadForUser(user).createSchema().uri()
+        );
     }
 }

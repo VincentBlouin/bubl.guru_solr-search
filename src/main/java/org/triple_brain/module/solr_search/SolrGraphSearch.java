@@ -1,3 +1,7 @@
+/*
+ * Copyright Vincent Blouin under the Mozilla Public License 1.1
+ */
+
 package org.triple_brain.module.solr_search;
 
 import org.apache.solr.client.solrj.SolrQuery;
@@ -7,6 +11,7 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.core.CoreContainer;
 import org.triple_brain.module.model.User;
+import org.triple_brain.module.model.graph.GraphElementType;
 import org.triple_brain.module.search.EdgeSearchResult;
 import org.triple_brain.module.search.GraphElementSearchResult;
 import org.triple_brain.module.search.GraphSearch;
@@ -19,9 +24,6 @@ import java.util.StringTokenizer;
 
 import static org.triple_brain.module.common_utils.Uris.encodeURL;
 
-/*
-* Copyright Mozilla Public License 1.1
-*/
 public class SolrGraphSearch implements GraphSearch {
     private enum SearchParam {
         ONLY_OWN_VERTICES,
@@ -39,7 +41,7 @@ public class SolrGraphSearch implements GraphSearch {
     }
 
     @Override
-    public List<VertexSearchResult> searchOwnVerticesAndPublicOnesForAutoCompletionByLabel(String label, User user) {
+    public List<VertexSearchResult> searchSchemasOwnVerticesAndPublicOnesForAutoCompletionByLabel(String label, User user) {
         return SearchToPojoConverter.verticesSearchResultFromDocuments(
                 autoCompletionResultsForTextAndParams(
                         label,

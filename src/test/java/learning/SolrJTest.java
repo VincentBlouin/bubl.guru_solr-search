@@ -1,3 +1,7 @@
+/*
+ * Copyright Vincent Blouin under the Mozilla Public License 1.1
+ */
+
 package learning;
 
 import org.apache.solr.client.solrj.SolrQuery;
@@ -26,9 +30,6 @@ import java.util.UUID;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.*;
 
-/*
-* Copyright Mozilla Public License 1.1
-*/
 public class SolrJTest {
     String solrHomeRelativePath = "src/test/resources/learning/solr/";
     String solrXMLHomeRelativePath = "conf/solr.xml";

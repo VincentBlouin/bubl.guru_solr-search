@@ -1,3 +1,7 @@
+/*
+ * Copyright Vincent Blouin under the Mozilla Public License 1.1
+ */
+
 package org.triple_brain.module.solr_search;
 
 import com.google.inject.AbstractModule;
@@ -10,9 +14,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 
-/*
-* Copyright Mozilla Public License 1.1
-*/
 public class SolrSearchModule  extends AbstractModule {
     private Boolean isTesting;
     private String solrHomePath;

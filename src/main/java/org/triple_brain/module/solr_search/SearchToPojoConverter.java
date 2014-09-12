@@ -1,3 +1,7 @@
+/*
+ * Copyright Vincent Blouin under the Mozilla Public License 1.1
+ */
+
 package org.triple_brain.module.solr_search;
 
 import org.apache.solr.common.SolrDocument;
@@ -18,9 +22,6 @@ import java.util.*;
 
 import static org.triple_brain.module.common_utils.Uris.decodeUrl;
 
-/*
-* Copyright Mozilla Public License 1.1
-*/
 public class SearchToPojoConverter {
 
     public static List<VertexSearchResult> verticesSearchResultFromDocuments(SolrDocumentList documentList) {
@@ -52,7 +53,7 @@ public class SearchToPojoConverter {
     private static VertexSearchResult vertexSearchResultFromDocument(SolrDocument document) {
         return new VertexSearchResult(
                 graphElementFromDocument(document),
-                buildRelationsName(document)
+                buildPropertiesName(document)
         );
     }
 
@@ -99,8 +100,8 @@ public class SearchToPojoConverter {
         );
     }
 
-    private static List<String> buildRelationsName(SolrDocument document) {
-        return (ArrayList<String>) document.get("relation_name");
+    private static List<String> buildPropertiesName(SolrDocument document) {
+        return (ArrayList<String>) document.get("property_name");
     }
 
     private static Map<URI, IdentificationPojo> buildIdentifications(SolrDocument document) {

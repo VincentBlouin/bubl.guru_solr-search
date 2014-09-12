@@ -1,3 +1,7 @@
+/*
+ * Copyright Vincent Blouin under the Mozilla Public License 1.1
+ */
+
 package org.triple_brain.module.solr_search;
 
 import com.google.inject.Inject;
@@ -10,6 +14,8 @@ import org.triple_brain.module.model.WholeGraph;
 import org.triple_brain.module.model.graph.GraphElement;
 import org.triple_brain.module.model.graph.edge.Edge;
 import org.triple_brain.module.model.graph.edge.EdgeOperator;
+import org.triple_brain.module.model.graph.schema.Schema;
+import org.triple_brain.module.model.graph.schema.SchemaOperator;
 import org.triple_brain.module.model.graph.vertex.VertexInSubGraphOperator;
 import org.triple_brain.module.model.graph.vertex.VertexOperator;
 import org.triple_brain.module.search.GraphIndexer;
@@ -23,15 +29,11 @@ import java.util.Set;
 
 import static org.triple_brain.module.common_utils.Uris.encodeURL;
 
-/*
-* Copyright Mozilla Public License 1.1
-*/
 public class SolrGraphIndexer implements GraphIndexer {
     @Inject
     WholeGraph wholeGraph;
 
     private int INDEX_AFTER_HOW_NB_DOCUMENTS = 100;
-    private CoreContainer coreContainer;
     private SearchUtils searchUtils;
 
     public static SolrGraphIndexer withCoreContainer(CoreContainer coreContainer) {
@@ -39,7 +41,6 @@ public class SolrGraphIndexer implements GraphIndexer {
     }
 
     private SolrGraphIndexer(CoreContainer coreContainer) {
-        this.coreContainer = coreContainer;
         this.searchUtils = SearchUtils.usingCoreCoreContainer(coreContainer);
     }
 
@@ -47,6 +48,7 @@ public class SolrGraphIndexer implements GraphIndexer {
     public void indexWholeGraph() {
         indexAllVertices();
         indexAllEdges();
+        indexAllSchemas();
     }
 
     @Override
@@ -64,6 +66,13 @@ public class SolrGraphIndexer implements GraphIndexer {
     }
 
     @Override
+    public void indexSchema(Schema schema) {
+        addDocument(
+                schemaDocument(schema)
+        );
+    }
+
+    @Override
     public void deleteGraphElement(GraphElement graphElement) {
         try {
             SolrServer solrServer = searchUtils.getServer();
@@ -75,29 +84,6 @@ public class SolrGraphIndexer implements GraphIndexer {
         } catch (IOException | SolrServerException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Override
-    public void handleEdgeLabelUpdated(EdgeOperator edge) {
-        Set<SolrInputDocument> updatedDocuments = new HashSet<>();
-        updatedDocuments.add(
-                vertexDocument(
-                        edge.sourceVertex()
-                )
-        );
-        updatedDocuments.add(
-                vertexDocument(
-                        edge.destinationVertex()
-                )
-        );
-        updatedDocuments.add(
-                edgeDocument(
-                        edge
-                )
-        );
-        addDocuments(
-                updatedDocuments
-        );
     }
 
     @Override
@@ -126,12 +112,21 @@ public class SolrGraphIndexer implements GraphIndexer {
     private SolrInputDocument vertexDocument(VertexOperator vertex) {
         SolrInputDocument document = graphElementToDocument(vertex);
         document.addField("is_vertex", true);
+        document.addField("is_schema", false);
         document.addField("is_public", vertex.isPublic());
         document.addField("comment", vertex.comment());
-        for (Edge edge : vertex.connectedEdges()) {
+        return document;
+    }
+
+    private SolrInputDocument schemaDocument(Schema schema) {
+        SolrInputDocument document = friendlyResourceToDocument(schema);
+        document.addField("is_vertex", true);
+        document.addField("is_schema", true);
+        document.addField("is_public", true);
+        for (GraphElement property : schema.getProperties().values()) {
             document.addField(
-                    "relation_name",
-                    edge.label()
+                    "property_name",
+                    property.label()
             );
         }
         return document;
@@ -163,6 +158,38 @@ public class SolrGraphIndexer implements GraphIndexer {
         totalIndexed += nbInCycle;
         System.out.println(
                 "Indexing vertices ... total indexed " + totalIndexed
+        );
+    }
+
+    private void indexAllSchemas() {
+        Iterator<SchemaOperator> schemaIt = wholeGraph.getAllSchemas();
+        Set<SolrInputDocument> schemasDocument = new HashSet<>();
+        int totalIndexed = 0;
+        int nbInCycle = 0;
+        while (schemaIt.hasNext()) {
+            schemasDocument.add(
+                    schemaDocument(schemaIt.next())
+            );
+            nbInCycle++;
+            if (nbInCycle == INDEX_AFTER_HOW_NB_DOCUMENTS) {
+                totalIndexed += INDEX_AFTER_HOW_NB_DOCUMENTS;
+                addDocuments(schemasDocument);
+                commit();
+                System.out.println(
+                        "Indexing schemas ... total indexed yet " + totalIndexed
+                );
+                nbInCycle = 0;
+                schemasDocument = new HashSet<>();
+            }
+        }
+        if(schemasDocument.isEmpty()){
+            return;
+        }
+        addDocuments(schemasDocument);
+        commit();
+        totalIndexed += nbInCycle;
+        System.out.println(
+                "Indexing schemas ... total indexed " + totalIndexed
         );
     }
 
@@ -216,17 +243,21 @@ public class SolrGraphIndexer implements GraphIndexer {
     }
 
     private SolrInputDocument graphElementToDocument(GraphElement graphElement) {
-        SolrInputDocument document = new SolrInputDocument();
-        document.addField("uri", encodeURL(graphElement.uri()));
-        document.addField("label", graphElement.label());
-        document.addField("label_lower_case", graphElement.label().toLowerCase());
-        document.addField("owner_username", graphElement.ownerUsername());
+        SolrInputDocument document = friendlyResourceToDocument(graphElement);
         for (URI identificationUri : graphElement.getIdentifications().keySet()) {
             document.addField(
                     "identification",
                     encodeURL(identificationUri)
             );
         }
+        return document;
+    }
+    private SolrInputDocument friendlyResourceToDocument(FriendlyResource friendlyResource) {
+        SolrInputDocument document = new SolrInputDocument();
+        document.addField("uri", encodeURL(friendlyResource.uri()));
+        document.addField("label", friendlyResource.label());
+        document.addField("label_lower_case", friendlyResource.label().toLowerCase());
+        document.addField("owner_username", friendlyResource.getOwnerUsername());
         return document;
     }
 }

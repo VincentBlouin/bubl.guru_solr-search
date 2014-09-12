@@ -1,3 +1,7 @@
+/*
+ * Copyright Vincent Blouin under the Mozilla Public License 1.1
+ */
+
 package learning;
 
 import org.junit.Test;
@@ -7,9 +11,6 @@ import java.util.StringTokenizer;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
-/*
-* Copyright Mozilla Public License 1.1
-*/
 public class StringManipulationTest {
     @Test
     public void can_get_last_word_of_sentence(){

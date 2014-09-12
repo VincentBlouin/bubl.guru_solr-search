@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Copyright Vincent Blouin under the Mozilla Public License 1.1
+  -->
+<enumsConfig>
+    <enum name="graph_element_type">
+        <value>relation</value>
+        <value>vertex</value>
+        <value>schema</value>
+    </enum>
+</enumsConfig>
