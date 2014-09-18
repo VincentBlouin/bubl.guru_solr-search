@@ -4,7 +4,6 @@
 
 package org.triple_brain.module.solr_search;
 
-import com.google.gson.Gson;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -16,7 +15,6 @@ import org.junit.BeforeClass;
 import org.triple_brain.module.model.User;
 import org.triple_brain.module.model.graph.AdaptableGraphComponentTest;
 import org.triple_brain.module.model.graph.GraphFactory;
-import org.triple_brain.module.model.graph.UserGraph;
 import org.triple_brain.module.model.graph.schema.SchemaOperator;
 import org.triple_brain.module.model.graph.vertex.Vertex;
 import org.triple_brain.module.model.graph.vertex.VertexOperator;

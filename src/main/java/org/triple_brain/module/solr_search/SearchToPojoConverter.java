@@ -6,13 +6,17 @@ package org.triple_brain.module.solr_search;
 
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
+import org.codehaus.jettison.json.JSONObject;
 import org.triple_brain.module.common_utils.Uris;
 import org.triple_brain.module.model.Image;
 import org.triple_brain.module.model.graph.FriendlyResourcePojo;
 import org.triple_brain.module.model.graph.GraphElementPojo;
+import org.triple_brain.module.model.graph.Identification;
 import org.triple_brain.module.model.graph.IdentificationPojo;
 import org.triple_brain.module.model.graph.edge.EdgePojo;
 import org.triple_brain.module.model.graph.vertex.VertexInSubGraphPojo;
+import org.triple_brain.module.model.json.IdentificationJson;
+import org.triple_brain.module.model.json.graph.GraphElementJson;
 import org.triple_brain.module.search.EdgeSearchResult;
 import org.triple_brain.module.search.GraphElementSearchResult;
 import org.triple_brain.module.search.VertexSearchResult;
@@ -53,7 +57,7 @@ public class SearchToPojoConverter {
     private static VertexSearchResult vertexSearchResultFromDocument(SolrDocument document) {
         return new VertexSearchResult(
                 graphElementFromDocument(document),
-                buildPropertiesName(document)
+                buildProperties(document)
         );
     }
 
@@ -100,8 +104,10 @@ public class SearchToPojoConverter {
         );
     }
 
-    private static List<String> buildPropertiesName(SolrDocument document) {
-        return (ArrayList<String>) document.get("property_name");
+    private static Map<URI, GraphElementPojo> buildProperties(SolrDocument document) {
+        return GraphElementJson.fromJsonObjectToMap(
+                (String) document.get("properties")
+        );
     }
 
     private static Map<URI, IdentificationPojo> buildIdentifications(SolrDocument document) {

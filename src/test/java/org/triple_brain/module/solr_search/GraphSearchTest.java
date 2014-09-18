@@ -6,16 +6,17 @@ package org.triple_brain.module.solr_search;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import org.triple_brain.module.model.graph.GraphElement;
-import org.triple_brain.module.model.graph.GraphElementOperator;
-import org.triple_brain.module.model.graph.GraphElementPojo;
+import org.triple_brain.module.model.graph.*;
 import org.triple_brain.module.model.graph.edge.Edge;
 import org.triple_brain.module.model.graph.schema.SchemaOperator;
 import org.triple_brain.module.search.EdgeSearchResult;
 import org.triple_brain.module.search.GraphElementSearchResult;
 import org.triple_brain.module.search.VertexSearchResult;
 
+import java.net.URI;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.*;
@@ -67,6 +68,7 @@ public class GraphSearchTest extends SearchRelatedTest {
                 is("A description")
         );
     }
+
     @Test
     public void can_search_for_other_users_public_vertices() {
         indexGraph();
@@ -194,10 +196,14 @@ public class GraphSearchTest extends SearchRelatedTest {
     }
 
     @Test
-    public void can_search_schema(){
+    public void can_search_schema() {
         SchemaOperator schema = createSchema(user);
         schema.label("schema1");
-        graphIndexer.indexSchema(schema);
+        graphIndexer.indexSchema(
+                userGraph.schemaPojoWithUri(
+                        schema.uri()
+                )
+        );
         graphIndexer.commit();
         List<VertexSearchResult> results = graphSearch.searchSchemasOwnVerticesAndPublicOnesForAutoCompletionByLabel(
                 "schema",
@@ -214,41 +220,49 @@ public class GraphSearchTest extends SearchRelatedTest {
     }
 
     @Test
-    public void schema_properties_name_can_be_retrieved() throws Exception {
+    public void schema_properties_can_be_retrieved() throws Exception {
         SchemaOperator schema = createSchema(user);
         schema.label("schema1");
-        graphIndexer.indexSchema(schema);
+        graphIndexer.indexSchema(
+                userGraph.schemaPojoWithUri(
+                        schema.uri()
+                )
+        );
         graphIndexer.commit();
         List<VertexSearchResult> searchResults = graphSearch.searchSchemasOwnVerticesAndPublicOnesForAutoCompletionByLabel(
                 "schema",
                 user
         );
         VertexSearchResult result = searchResults.get(0);
-        List<String> propertiesName = result.getPropertiesName();
+        Map<URI, GraphElementPojo> properties = result.getProperties();
         assertTrue(
-                propertiesName.isEmpty()
+                properties.isEmpty()
         );
         GraphElementOperator property1 = schema.addProperty();
         property1.label("prop1");
         GraphElementOperator property2 = schema.addProperty();
         property2.label("prop2");
-        graphIndexer.indexSchema(schema);
+        graphIndexer.indexSchema(
+                userGraph.schemaPojoWithUri(
+                        schema.uri()
+                )
+        );
         graphIndexer.commit();
         searchResults = graphSearch.searchSchemasOwnVerticesAndPublicOnesForAutoCompletionByLabel(
                 "schema",
                 user
         );
         result = searchResults.get(0);
-        propertiesName = result.getPropertiesName();
+        properties = result.getProperties();
         assertThat(
-                propertiesName.size(),
+                properties.size(),
                 is(2)
         );
         assertTrue(
-                propertiesName.contains("prop1")
+                properties.containsKey(property1.uri())
         );
         assertTrue(
-                propertiesName.contains("prop2")
+                properties.containsKey(property2.uri())
         );
     }
 
@@ -256,7 +270,11 @@ public class GraphSearchTest extends SearchRelatedTest {
     public void can_search_not_owned_schema() {
         SchemaOperator schema = createSchema(user);
         schema.label("schema1");
-        graphIndexer.indexSchema(schema);
+        graphIndexer.indexSchema(
+                userGraph.schemaPojoWithUri(
+                        schema.uri()
+                )
+        );
         graphIndexer.commit();
         List<VertexSearchResult> searchResults = graphSearch.searchSchemasOwnVerticesAndPublicOnesForAutoCompletionByLabel(
                 "schema",

@@ -19,7 +19,7 @@
         <field name="label" type="string" indexed="false" stored="true"/>
         <field name="label_lower_case" type="string" indexed="true" stored="false"/>
         <field name="comment" type="string" indexed="false" stored="true"/>
-        <field name="property_name" multiValued="true" type="string" indexed="false" stored="true"/>
+        <field name="properties" type="string" indexed="false" stored="true"/>
         <field name="identification" multiValued="true" type="string" indexed="false" stored="true"/>
         <field name="source_vertex_uri" type="string" indexed="false" stored="true"/>
         <field name="destination_vertex_uri" type="string" indexed="false" stored="true"/>

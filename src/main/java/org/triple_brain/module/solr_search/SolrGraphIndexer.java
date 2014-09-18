@@ -11,21 +11,22 @@ import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.CoreContainer;
 import org.triple_brain.module.model.FriendlyResource;
 import org.triple_brain.module.model.WholeGraph;
+import org.triple_brain.module.model.graph.FriendlyResourcePojo;
 import org.triple_brain.module.model.graph.GraphElement;
+import org.triple_brain.module.model.graph.GraphElementPojo;
 import org.triple_brain.module.model.graph.edge.Edge;
 import org.triple_brain.module.model.graph.edge.EdgeOperator;
 import org.triple_brain.module.model.graph.schema.Schema;
 import org.triple_brain.module.model.graph.schema.SchemaOperator;
+import org.triple_brain.module.model.graph.schema.SchemaPojo;
 import org.triple_brain.module.model.graph.vertex.VertexInSubGraphOperator;
 import org.triple_brain.module.model.graph.vertex.VertexOperator;
+import org.triple_brain.module.model.json.graph.GraphElementJson;
 import org.triple_brain.module.search.GraphIndexer;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 
 import static org.triple_brain.module.common_utils.Uris.encodeURL;
 
@@ -66,7 +67,7 @@ public class SolrGraphIndexer implements GraphIndexer {
     }
 
     @Override
-    public void indexSchema(Schema schema) {
+    public void indexSchema(SchemaPojo schema) {
         addDocument(
                 schemaDocument(schema)
         );
@@ -118,17 +119,15 @@ public class SolrGraphIndexer implements GraphIndexer {
         return document;
     }
 
-    private SolrInputDocument schemaDocument(Schema schema) {
+    private SolrInputDocument schemaDocument(SchemaPojo schema) {
         SolrInputDocument document = friendlyResourceToDocument(schema);
         document.addField("is_vertex", true);
         document.addField("is_schema", true);
         document.addField("is_public", true);
-        for (GraphElement property : schema.getProperties().values()) {
-            document.addField(
-                    "property_name",
-                    property.label()
-            );
-        }
+        document.addField(
+                "properties",
+                GraphElementJson.multipleToJson(schema.getProperties())
+        );
         return document;
     }
 
@@ -168,7 +167,9 @@ public class SolrGraphIndexer implements GraphIndexer {
         int nbInCycle = 0;
         while (schemaIt.hasNext()) {
             schemasDocument.add(
-                    schemaDocument(schemaIt.next())
+                    schemaDocument(
+                            new SchemaPojo(schemaIt.next())
+                    )
             );
             nbInCycle++;
             if (nbInCycle == INDEX_AFTER_HOW_NB_DOCUMENTS) {
