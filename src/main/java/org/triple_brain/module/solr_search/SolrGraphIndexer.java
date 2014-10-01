@@ -11,12 +11,9 @@ import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.CoreContainer;
 import org.triple_brain.module.model.FriendlyResource;
 import org.triple_brain.module.model.WholeGraph;
-import org.triple_brain.module.model.graph.FriendlyResourcePojo;
 import org.triple_brain.module.model.graph.GraphElement;
-import org.triple_brain.module.model.graph.GraphElementPojo;
 import org.triple_brain.module.model.graph.edge.Edge;
 import org.triple_brain.module.model.graph.edge.EdgeOperator;
-import org.triple_brain.module.model.graph.schema.Schema;
 import org.triple_brain.module.model.graph.schema.SchemaOperator;
 import org.triple_brain.module.model.graph.schema.SchemaPojo;
 import org.triple_brain.module.model.graph.vertex.VertexInSubGraphOperator;
@@ -26,7 +23,10 @@ import org.triple_brain.module.search.GraphIndexer;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 import static org.triple_brain.module.common_utils.Uris.encodeURL;
 
@@ -99,6 +99,8 @@ public class SolrGraphIndexer implements GraphIndexer {
     private SolrInputDocument edgeDocument(Edge edge) {
         SolrInputDocument document = graphElementToDocument(edge);
         document.addField("is_vertex", false);
+        document.addField("is_schema", false);
+        document.addField("is_relation", true);
         document.addField(
                 "source_vertex_uri",
                 encodeURL(edge.sourceVertex().uri())
@@ -114,6 +116,7 @@ public class SolrGraphIndexer implements GraphIndexer {
         SolrInputDocument document = graphElementToDocument(vertex);
         document.addField("is_vertex", true);
         document.addField("is_schema", false);
+        document.addField("is_relation", false);
         document.addField("is_public", vertex.isPublic());
         document.addField("comment", vertex.comment());
         return document;
@@ -121,8 +124,9 @@ public class SolrGraphIndexer implements GraphIndexer {
 
     private SolrInputDocument schemaDocument(SchemaPojo schema) {
         SolrInputDocument document = friendlyResourceToDocument(schema);
-        document.addField("is_vertex", true);
+        document.addField("is_vertex", false);
         document.addField("is_schema", true);
+        document.addField("is_relation", false);
         document.addField("is_public", true);
         document.addField(
                 "properties",

@@ -25,10 +25,6 @@ import java.util.StringTokenizer;
 import static org.triple_brain.module.common_utils.Uris.encodeURL;
 
 public class SolrGraphSearch implements GraphSearch {
-    private enum SearchParam {
-        ONLY_OWN_VERTICES,
-        IS_VERTEX
-    }
 
     private SearchUtils searchUtils;
 
@@ -43,12 +39,21 @@ public class SolrGraphSearch implements GraphSearch {
     @Override
     public List<VertexSearchResult> searchSchemasOwnVerticesAndPublicOnesForAutoCompletionByLabel(String label, User user) {
         return SearchToPojoConverter.verticesSearchResultFromDocuments(
-                autoCompletionResultsForTextAndParams(
+                autoCompletionForPublicOrPrivate(
                         label,
                         user,
-                        new HashSet<SearchParam>() {{
-                            add(SearchParam.IS_VERTEX);
-                        }}
+                        "(is_vertex:true OR is_schema:true)"
+                )
+        );
+    }
+
+    @Override
+    public List<VertexSearchResult> searchOnlyForOwnVerticesOrSchemasForAutoCompletionByLabel(String label, User user) {
+        return SearchToPojoConverter.verticesSearchResultFromDocuments(
+                autoCompletionForPrivate(
+                        label,
+                        user,
+                        "(is_vertex:true OR is_schema:true)"
                 )
         );
     }
@@ -56,13 +61,10 @@ public class SolrGraphSearch implements GraphSearch {
     @Override
     public List<VertexSearchResult> searchOnlyForOwnVerticesForAutoCompletionByLabel(String label, User user) {
         return SearchToPojoConverter.verticesSearchResultFromDocuments(
-                autoCompletionResultsForTextAndParams(
+                autoCompletionForPrivate(
                         label,
                         user,
-                        new HashSet<SearchParam>() {{
-                            add(SearchParam.IS_VERTEX);
-                            add(SearchParam.ONLY_OWN_VERTICES);
-                        }}
+                        "is_vertex:true"
                 )
         );
     }
@@ -70,10 +72,10 @@ public class SolrGraphSearch implements GraphSearch {
     @Override
     public List<EdgeSearchResult> searchRelationsForAutoCompletionByLabel(String label, User user) {
         return SearchToPojoConverter.edgesSearchResultFromDocuments(
-                autoCompletionResultsForTextAndParams(
+                autoCompletionForPrivate(
                         label,
                         user,
-                        new HashSet<SearchParam>()
+                        "is_relation:true"
                 )
         );
     }
@@ -97,10 +99,36 @@ public class SolrGraphSearch implements GraphSearch {
         }
     }
 
-    private SolrDocumentList autoCompletionResultsForTextAndParams(
+    private SolrDocumentList autoCompletionForPublicOrPrivate(
             String label,
             User user,
-            HashSet<SearchParam> searchParams
+            String queryPart
+    ){
+        return autoCompletion(
+                label,
+                user,
+                queryPart,
+                false
+        );
+    }
+    private SolrDocumentList autoCompletionForPrivate(
+            String label,
+            User user,
+            String queryPart
+    ){
+        return autoCompletion(
+                label,
+                user,
+                queryPart,
+                true
+        );
+    }
+
+    private SolrDocumentList autoCompletion(
+            String label,
+            User user,
+            String queryPart,
+            Boolean forPrivateOnly
     ) {
         try {
             SolrServer solrServer = searchUtils.getServer();
@@ -110,9 +138,9 @@ public class SolrGraphSearch implements GraphSearch {
             String lastWord = lastWordOfSentence(label);
             solrQuery.setQuery(
                     "label_lower_case:" + sentenceMinusLastWord + "* AND " +
-                            "is_vertex:" + Boolean.toString(searchParams.contains(SearchParam.IS_VERTEX)) + " AND " +
+                            queryPart + " AND " +
                             "(owner_username:" + user.username() +
-                            (searchParams.contains(SearchParam.ONLY_OWN_VERTICES) ?
+                            (forPrivateOnly ?
                                     ")" :
                                     " OR " + "is_public:true)")
             );

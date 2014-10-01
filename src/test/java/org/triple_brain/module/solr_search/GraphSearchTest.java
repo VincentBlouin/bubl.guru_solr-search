@@ -6,7 +6,10 @@ package org.triple_brain.module.solr_search;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import org.triple_brain.module.model.graph.*;
+import org.triple_brain.module.model.graph.GraphElement;
+import org.triple_brain.module.model.graph.GraphElementOperator;
+import org.triple_brain.module.model.graph.GraphElementPojo;
+import org.triple_brain.module.model.graph.UserGraph;
 import org.triple_brain.module.model.graph.edge.Edge;
 import org.triple_brain.module.model.graph.schema.SchemaOperator;
 import org.triple_brain.module.search.EdgeSearchResult;
@@ -16,7 +19,6 @@ import org.triple_brain.module.search.VertexSearchResult;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.*;
@@ -76,14 +78,14 @@ public class GraphSearchTest extends SearchRelatedTest {
                 "vert",
                 user2
         );
-        assertFalse(vertices.size() > 0);
+        assertTrue(vertices.isEmpty());
         vertexA.makePublic();
         indexVertex(vertexA);
         vertices = graphSearch.searchSchemasOwnVerticesAndPublicOnesForAutoCompletionByLabel(
                 "vert",
                 user2
         );
-        assertTrue(vertices.size() > 0);
+        assertFalse(vertices.isEmpty());
     }
 
     @Test
@@ -100,6 +102,27 @@ public class GraphSearchTest extends SearchRelatedTest {
                 user2
         );
         assertFalse(vertices.size() > 0);
+    }
+    @Test
+    public void searching_for_own_vertices_does_not_return_schemas() {
+        SchemaOperator schema = createSchema(user);
+        schema.label("schema1");
+        graphIndexer.indexSchema(
+                userGraph.schemaPojoWithUri(
+                        schema.uri()
+                )
+        );
+        graphIndexer.commit();
+        List<VertexSearchResult> searchResult = graphSearch.searchSchemasOwnVerticesAndPublicOnesForAutoCompletionByLabel(
+                "schema",
+                user
+        );
+        assertFalse(searchResult.isEmpty());
+        searchResult = graphSearch.searchOnlyForOwnVerticesForAutoCompletionByLabel(
+                "schema",
+                user
+        );
+        assertTrue(searchResult.isEmpty());
     }
 
     @Test
@@ -149,7 +172,6 @@ public class GraphSearchTest extends SearchRelatedTest {
     }
 
     @Test
-    @Ignore("I dont know why but this test fails sometimes and succeeds in other times")
     public void can_search_relations() {
         indexGraph();
         List<EdgeSearchResult> results = graphSearch.searchRelationsForAutoCompletionByLabel(
@@ -157,6 +179,23 @@ public class GraphSearchTest extends SearchRelatedTest {
                 user
         );
         assertThat(results.size(), is(2));
+    }
+
+    @Test
+    public void schemas_are_not_included_in_relations_search() {
+        SchemaOperator schema = createSchema(user);
+        schema.label("schema1");
+        graphIndexer.indexSchema(
+                userGraph.schemaPojoWithUri(
+                        schema.uri()
+                )
+        );
+        graphIndexer.commit();
+        List<EdgeSearchResult> results = graphSearch.searchRelationsForAutoCompletionByLabel(
+                "schema1",
+                user
+        );
+        assertTrue(results.isEmpty());
     }
 
     @Test
@@ -281,5 +320,41 @@ public class GraphSearchTest extends SearchRelatedTest {
                 user2
         );
         assertFalse(searchResults.isEmpty());
+    }
+
+    @Test
+    public void can_search_for_only_owned_schemas() {
+        SchemaOperator schema = createSchema(user);
+        schema.label("schema1");
+        graphIndexer.indexSchema(
+                userGraph.schemaPojoWithUri(
+                        schema.uri()
+                )
+        );
+        SchemaOperator schema2 = createSchema(user2);
+        schema2.label("schema2");
+        graphIndexer.indexSchema(
+                userGraph.schemaPojoWithUri(
+                        schema2.uri()
+                )
+        );
+        graphIndexer.commit();
+        List<VertexSearchResult> searchResults = graphSearch.searchSchemasOwnVerticesAndPublicOnesForAutoCompletionByLabel(
+                "schema",
+                user
+        );
+        assertThat(
+                searchResults.size(),
+                is(2)
+        );
+
+        searchResults = graphSearch.searchOnlyForOwnVerticesOrSchemasForAutoCompletionByLabel(
+                "schema",
+                user
+        );
+        assertThat(
+                searchResults.size(),
+                is(1)
+        );
     }
 }

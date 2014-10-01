@@ -27,6 +27,7 @@ import javax.inject.Inject;
 import java.io.File;
 
 public class SearchRelatedTest extends AdaptableGraphComponentTest{
+
     @Inject
     GraphFactory graphMaker;
 
