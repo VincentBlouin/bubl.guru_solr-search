@@ -11,14 +11,12 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.core.CoreContainer;
 import org.triple_brain.module.model.User;
-import org.triple_brain.module.model.graph.GraphElementType;
 import org.triple_brain.module.search.EdgeSearchResult;
 import org.triple_brain.module.search.GraphElementSearchResult;
 import org.triple_brain.module.search.GraphSearch;
 import org.triple_brain.module.search.VertexSearchResult;
 
 import java.net.URI;
-import java.util.HashSet;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -70,12 +68,12 @@ public class SolrGraphSearch implements GraphSearch {
     }
 
     @Override
-    public List<EdgeSearchResult> searchRelationsForAutoCompletionByLabel(String label, User user) {
+    public List<GraphElementSearchResult> searchRelationsOrSchemasForAutoCompletionByLabel(String label, User user) {
         return SearchToPojoConverter.edgesSearchResultFromDocuments(
                 autoCompletionForPrivate(
                         label,
                         user,
-                        "is_relation:true"
+                        "(is_relation:true OR is_schema:true)"
                 )
         );
     }

@@ -9,7 +9,6 @@ import org.junit.Test;
 import org.triple_brain.module.model.graph.GraphElement;
 import org.triple_brain.module.model.graph.GraphElementOperator;
 import org.triple_brain.module.model.graph.GraphElementPojo;
-import org.triple_brain.module.model.graph.UserGraph;
 import org.triple_brain.module.model.graph.edge.Edge;
 import org.triple_brain.module.model.graph.schema.SchemaOperator;
 import org.triple_brain.module.search.EdgeSearchResult;
@@ -158,11 +157,11 @@ public class GraphSearchTest extends SearchRelatedTest {
     @Test
     public void relation_source_and_destination_vertex_uri_are_included_in_result() {
         indexGraph();
-        List<EdgeSearchResult> relations = graphSearch.searchRelationsForAutoCompletionByLabel(
+        List<GraphElementSearchResult> relations = graphSearch.searchRelationsOrSchemasForAutoCompletionByLabel(
                 "between vert",
                 user
         );
-        Edge edge = relations.get(0).getEdge();
+        Edge edge = ((EdgeSearchResult)relations.get(0)).getEdge();
         assertFalse(
                 null == edge.sourceVertex().uri()
         );
@@ -175,7 +174,7 @@ public class GraphSearchTest extends SearchRelatedTest {
     @Ignore("I dont know why but this test fails sometimes and succeeds in other times")
     public void can_search_relations() {
         indexGraph();
-        List<EdgeSearchResult> results = graphSearch.searchRelationsForAutoCompletionByLabel(
+        List<GraphElementSearchResult> results = graphSearch.searchRelationsOrSchemasForAutoCompletionByLabel(
                 "between vert",
                 user
         );
@@ -183,7 +182,12 @@ public class GraphSearchTest extends SearchRelatedTest {
     }
 
     @Test
-    public void schemas_are_not_included_in_relations_search() {
+    public void schemas_are_included_in_relations_search() {
+        List<GraphElementSearchResult> results = graphSearch.searchRelationsOrSchemasForAutoCompletionByLabel(
+                "schema1",
+                user
+        );
+        assertTrue(results.isEmpty());
         SchemaOperator schema = createSchema(user);
         schema.label("schema1");
         graphIndexer.indexSchema(
@@ -192,11 +196,11 @@ public class GraphSearchTest extends SearchRelatedTest {
                 )
         );
         graphIndexer.commit();
-        List<EdgeSearchResult> results = graphSearch.searchRelationsForAutoCompletionByLabel(
+        results = graphSearch.searchRelationsOrSchemasForAutoCompletionByLabel(
                 "schema1",
                 user
         );
-        assertTrue(results.isEmpty());
+        assertFalse(results.isEmpty());
     }
 
     @Test

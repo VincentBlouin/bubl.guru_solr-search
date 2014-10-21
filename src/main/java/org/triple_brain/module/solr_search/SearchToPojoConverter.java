@@ -38,14 +38,14 @@ public class SearchToPojoConverter {
         return vertices;
     }
 
-    public static List<EdgeSearchResult> edgesSearchResultFromDocuments(SolrDocumentList documentList) {
-        List<EdgeSearchResult> edges = new ArrayList<>();
+    public static List<GraphElementSearchResult> edgesSearchResultFromDocuments(SolrDocumentList documentList) {
+        List<GraphElementSearchResult> results = new ArrayList<>();
         for (SolrDocument document : documentList) {
-            edges.add(edgeSearchResultFromDocument(
+            results.add(graphElementSearchResultFromDocument(
                     document
             ));
         }
-        return edges;
+        return results;
     }
 
     public static GraphElementSearchResult graphElementSearchResultFromDocument(SolrDocument document) {
