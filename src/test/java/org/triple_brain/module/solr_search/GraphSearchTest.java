@@ -362,4 +362,24 @@ public class GraphSearchTest extends SearchRelatedTest {
                 is(1)
         );
     }
+    @Test
+    public void search_results_contains_comment() {
+        SchemaOperator schema = createSchema(user);
+        schema.label("schema1");
+        schema.comment("test comment");
+        graphIndexer.indexSchema(
+                userGraph.schemaPojoWithUri(
+                        schema.uri()
+                )
+        );
+        graphIndexer.commit();
+        VertexSearchResult result = graphSearch.searchSchemasOwnVerticesAndPublicOnesForAutoCompletionByLabel(
+                "schema",
+                user
+        ).get(0);
+        assertThat(
+                result.getGraphElement().comment(),
+                is("test comment")
+        );
+    }
 }

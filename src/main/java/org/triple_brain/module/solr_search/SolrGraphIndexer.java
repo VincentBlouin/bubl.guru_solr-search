@@ -118,7 +118,6 @@ public class SolrGraphIndexer implements GraphIndexer {
         document.addField("is_schema", false);
         document.addField("is_relation", false);
         document.addField("is_public", vertex.isPublic());
-        document.addField("comment", vertex.comment());
         return document;
     }
 
@@ -263,6 +262,7 @@ public class SolrGraphIndexer implements GraphIndexer {
         document.addField("label", friendlyResource.label());
         document.addField("label_lower_case", friendlyResource.label().toLowerCase());
         document.addField("owner_username", friendlyResource.getOwnerUsername());
+        document.addField("comment", friendlyResource.comment());
         return document;
     }
 }
