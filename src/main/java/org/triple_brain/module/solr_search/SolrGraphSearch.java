@@ -8,6 +8,7 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.core.CoreContainer;
 import org.triple_brain.module.model.User;
@@ -131,16 +132,16 @@ public class SolrGraphSearch implements GraphSearch {
             SolrServer solrServer = searchUtils.getServer();
             SolrQuery solrQuery = new SolrQuery();
             label = label.toLowerCase();
-            String sentenceMinusLastWord = sentenceMinusLastWord(label);
-            String lastWord = lastWordOfSentence(label);
+            String sentenceMinusLastWord = ClientUtils.escapeQueryChars(sentenceMinusLastWord(label));
+            String lastWord = ClientUtils.escapeQueryChars(lastWordOfSentence(label));
             solrQuery.setQuery(
                     "label_lower_case:" + sentenceMinusLastWord + "* AND " +
-                            queryPart + " AND " +
-                            "(owner_username:" + user.username() +
-                            (forPrivateOnly ?
-                                    ")" :
-                                    " OR " + "is_public:true)")
-            );
+                                    queryPart + " AND " +
+                                    "(owner_username:" + user.username() +
+                                    (forPrivateOnly ?
+                                            ")" :
+                                            " OR " + "is_public:true)")
+                    );
             solrQuery.addFilterQuery("label_lower_case:" + sentenceMinusLastWord + "*" + lastWord + "*");
             QueryResponse queryResponse = solrServer.query(solrQuery);
             return queryResponse.getResults();

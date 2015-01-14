@@ -382,4 +382,19 @@ public class GraphSearchTest extends SearchRelatedTest {
                 is("test comment")
         );
     }
+
+    @Test
+    public void search_queries_can_have_special_characters() {
+        vertexA.label("a(test*");
+        indexGraph();
+        List<VertexSearchResult> vertices = graphSearch.searchSchemasOwnVerticesAndPublicOnesForAutoCompletionByLabel(
+                "a(test*",
+                user
+        );
+        GraphElement vertex = vertices.get(0).getGraphElementSearchResult().getGraphElement();
+        assertThat(
+                vertex.label(),
+                is("a(test*")
+        );
+    }
 }
