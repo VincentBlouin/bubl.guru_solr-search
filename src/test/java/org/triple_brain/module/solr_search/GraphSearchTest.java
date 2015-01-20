@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.triple_brain.module.model.graph.GraphElement;
 import org.triple_brain.module.model.graph.GraphElementOperator;
 import org.triple_brain.module.model.graph.GraphElementPojo;
+import org.triple_brain.module.model.graph.IdentificationPojo;
 import org.triple_brain.module.model.graph.edge.Edge;
 import org.triple_brain.module.model.graph.schema.SchemaOperator;
 import org.triple_brain.module.search.EdgeSearchResult;
@@ -397,4 +398,36 @@ public class GraphSearchTest extends SearchRelatedTest {
                 is("a(test*")
         );
     }
+
+    @Test
+    public void has_identifications(){
+        indexGraph();
+        GraphElement vertex = graphSearch.searchSchemasOwnVerticesAndPublicOnesForAutoCompletionByLabel(
+                vertexA.label(),
+                user
+        ).get(0).getGraphElementSearchResult().getGraphElement();
+        assertThat(
+                vertex.getIdentifications().size(),
+                is(0)
+        );
+        vertexA.addGenericIdentification(
+                modelTestScenarios.computerScientistType()
+        );
+        indexGraph();
+        vertex = graphSearch.searchSchemasOwnVerticesAndPublicOnesForAutoCompletionByLabel(
+                vertexA.label(),
+                user
+        ).get(0).getGraphElementSearchResult().getGraphElement();
+        assertThat(
+                vertex.getIdentifications().size(),
+                is(1)
+        );
+    }
+
+    @Test
+    public void has_number_of_references_to_an_identification(){
+
+    }
+
+
 }
