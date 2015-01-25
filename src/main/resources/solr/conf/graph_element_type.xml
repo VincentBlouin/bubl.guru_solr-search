@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
+
 <!--
   ~ Copyright Vincent Blouin under the Mozilla Public License 1.1
   -->
@@ -7,5 +8,6 @@
         <value>relation</value>
         <value>vertex</value>
         <value>schema</value>
+        <value>schema_property</value>
     </enum>
 </enumsConfig>

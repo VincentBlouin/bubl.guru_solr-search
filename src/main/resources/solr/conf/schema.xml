@@ -9,11 +9,13 @@
     <types>
         <fieldType name="string" class="solr.StrField" sortMissingLast="true"/>
         <fieldType name="boolean" class="solr.BoolField" sortMissingLast="true"/>
+        <!--<fieldType name="graph_element_type" class="solr.EnumField" enumsConfig="graph_element_type.xml" enumName="graph_element_type" />-->
     </types>
     <fields>
         <field name="uri" type="string" indexed="true" stored="true" required="true"/>
         <field name="is_public" type="boolean" indexed="true" stored="false"/>
         <field name="owner_username" type="string" indexed="true" stored="true" required="true"/>
+        <!--<field name="graph_element_type" type="string" indexed="true" stored="true" required="true"/>-->
         <field name="is_vertex" type="boolean" indexed="true" stored="true"/>
         <field name="is_schema" type="boolean" indexed="true" stored="true"/>
         <field name="is_relation" type="boolean" indexed="true" stored="true"/>
@@ -21,6 +23,7 @@
         <field name="label_lower_case" type="string" indexed="true" stored="false"/>
         <field name="comment" type="string" indexed="false" stored="true"/>
         <field name="properties" type="string" indexed="false" stored="true"/>
+        <field name="property_label" multiValued="true" type="string" indexed="true" stored="false"/>
         <field name="identification" multiValued="true" type="string" indexed="false" stored="true"/>
         <field name="source_vertex_uri" type="string" indexed="false" stored="true"/>
         <field name="destination_vertex_uri" type="string" indexed="false" stored="true"/>

@@ -168,6 +168,20 @@ public class SolrJTest {
         assertThat(documents.size(), is(0));
     }
 
+    @Test
+    public void can_search_on_a_multivalue_field()throws Exception{
+        SolrInputDocument doc1 = new SolrInputDocument();
+        doc1.addField( "id", "foo");
+        doc1.addField( "multi_value", "apple");
+        doc1.addField( "multi_value", "meat");
+        solrServer.add(doc1);
+        solrServer.commit();
+        SolrDocumentList docs = resultsOfQuery(
+                new SolrQuery().setQuery("multi_value:meat")
+        );
+        assertThat(docs.size(), is(1));
+    }
+
     private QueryResponse createCoreWithName(String name)throws Exception{
         SolrQuery solrQuery = new SolrQuery();
         solrQuery.setParam(CommonParams.QT, "/admin/cores");

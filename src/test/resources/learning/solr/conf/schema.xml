@@ -14,5 +14,6 @@
         <field name="id" type="string" indexed="true" stored="true" required="true" />
         <field name="name" type="string" indexed="true" stored="true"/>
         <field name="price" type="double" indexed="true" stored="true"/>
+        <field name="multi_value" multiValued="true" type="string" indexed="true" stored="false"/>
     </fields>
 </schema>

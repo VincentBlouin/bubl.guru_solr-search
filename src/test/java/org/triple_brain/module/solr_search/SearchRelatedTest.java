@@ -77,8 +77,7 @@ public class SearchRelatedTest extends AdaptableGraphComponentTest{
                 "test@example.org",
                 "[fr]"
         );
-        deleteAllDocsOfUser(user);
-        deleteAllDocsOfUser(user2);
+        deleteAllDocs();
         makeGraphHave3SerialVerticesWithLongLabels();
         vertexOfUser2 = graphMaker.createForUser(user2).defaultVertex();
         pineApple = testScenarios.addPineAppleVertexToVertex(vertexC);
@@ -97,6 +96,12 @@ public class SearchRelatedTest extends AdaptableGraphComponentTest{
         vertexA = vertexABAndC.vertexA();
         vertexB = vertexABAndC.vertexB();
         vertexC = vertexABAndC.vertexC();
+    }
+
+    protected void deleteAllDocs()throws Exception{
+        SolrServer solrServer = solrServer();
+        solrServer.deleteByQuery("*:*");
+        solrServer.commit();
     }
 
     protected void deleteAllDocsOfUser(User user)throws Exception{

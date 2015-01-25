@@ -68,7 +68,7 @@ public class SolrGraphSearch implements GraphSearch {
     }
 
     @Override
-    public List<GraphElementSearchResult> searchRelationsOrSchemasForAutoCompletionByLabel(String label, User user) {
+    public List<GraphElementSearchResult> searchRelationsPropertiesOrSchemasForAutoCompletionByLabel(String label, User user) {
         return SearchToPojoConverter.edgesSearchResultFromDocuments(
                 autoCompletionForPrivate(
                         label,
@@ -101,7 +101,7 @@ public class SolrGraphSearch implements GraphSearch {
             String label,
             User user,
             String queryPart
-    ){
+    ) {
         return autoCompletion(
                 label,
                 user,
@@ -109,11 +109,12 @@ public class SolrGraphSearch implements GraphSearch {
                 false
         );
     }
+
     private SolrDocumentList autoCompletionForPrivate(
             String label,
             User user,
             String queryPart
-    ){
+    ) {
         return autoCompletion(
                 label,
                 user,
@@ -135,14 +136,17 @@ public class SolrGraphSearch implements GraphSearch {
             String sentenceMinusLastWord = ClientUtils.escapeQueryChars(sentenceMinusLastWord(label));
             String lastWord = ClientUtils.escapeQueryChars(lastWordOfSentence(label));
             solrQuery.setQuery(
-                    "label_lower_case:" + sentenceMinusLastWord + "* AND " +
-                                    queryPart + " AND " +
-                                    "(owner_username:" + user.username() +
-                                    (forPrivateOnly ?
-                                            ")" :
-                                            " OR " + "is_public:true)")
-                    );
-            solrQuery.addFilterQuery("label_lower_case:" + sentenceMinusLastWord + "*" + lastWord + "*");
+                    queryPart + " AND " +
+                            "(owner_username:" + user.username() +
+                            (forPrivateOnly ?
+                                    ")" :
+                                    " OR " + "is_public:true)")
+            );
+            String labelQuery = "(" + sentenceMinusLastWord + "*" + lastWord + "*)";
+            solrQuery.addFilterQuery(
+                    "label_lower_case:" + labelQuery + " OR " +
+                            "property_label:" + labelQuery
+            );
             QueryResponse queryResponse = solrServer.query(solrQuery);
             return queryResponse.getResults();
         } catch (SolrServerException e) {

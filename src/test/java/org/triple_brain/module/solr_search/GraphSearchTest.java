@@ -6,10 +6,10 @@ package org.triple_brain.module.solr_search;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.triple_brain.module.model.graph.FriendlyResourcePojo;
 import org.triple_brain.module.model.graph.GraphElement;
 import org.triple_brain.module.model.graph.GraphElementOperator;
 import org.triple_brain.module.model.graph.GraphElementPojo;
-import org.triple_brain.module.model.graph.IdentificationPojo;
 import org.triple_brain.module.model.graph.edge.Edge;
 import org.triple_brain.module.model.graph.schema.SchemaOperator;
 import org.triple_brain.module.search.EdgeSearchResult;
@@ -158,7 +158,7 @@ public class GraphSearchTest extends SearchRelatedTest {
     @Test
     public void relation_source_and_destination_vertex_uri_are_included_in_result() {
         indexGraph();
-        List<GraphElementSearchResult> relations = graphSearch.searchRelationsOrSchemasForAutoCompletionByLabel(
+        List<GraphElementSearchResult> relations = graphSearch.searchRelationsPropertiesOrSchemasForAutoCompletionByLabel(
                 "between vert",
                 user
         );
@@ -175,7 +175,7 @@ public class GraphSearchTest extends SearchRelatedTest {
     @Ignore("I dont know why but this test fails sometimes and succeeds in other times")
     public void can_search_relations() {
         indexGraph();
-        List<GraphElementSearchResult> results = graphSearch.searchRelationsOrSchemasForAutoCompletionByLabel(
+        List<GraphElementSearchResult> results = graphSearch.searchRelationsPropertiesOrSchemasForAutoCompletionByLabel(
                 "between vert",
                 user
         );
@@ -184,7 +184,7 @@ public class GraphSearchTest extends SearchRelatedTest {
 
     @Test
     public void schemas_are_included_in_relations_search() {
-        List<GraphElementSearchResult> results = graphSearch.searchRelationsOrSchemasForAutoCompletionByLabel(
+        List<GraphElementSearchResult> results = graphSearch.searchRelationsPropertiesOrSchemasForAutoCompletionByLabel(
                 "schema1",
                 user
         );
@@ -197,7 +197,7 @@ public class GraphSearchTest extends SearchRelatedTest {
                 )
         );
         graphIndexer.commit();
-        results = graphSearch.searchRelationsOrSchemasForAutoCompletionByLabel(
+        results = graphSearch.searchRelationsPropertiesOrSchemasForAutoCompletionByLabel(
                 "schema1",
                 user
         );
@@ -266,7 +266,7 @@ public class GraphSearchTest extends SearchRelatedTest {
 
     @Test
     public void schema_properties_can_be_retrieved() throws Exception {
-        SchemaOperator schema = createSchema(user);
+        SchemaOperator schema = createSchema(userGraph.user());
         schema.label("schema1");
         graphIndexer.indexSchema(
                 userGraph.schemaPojoWithUri(
@@ -276,7 +276,7 @@ public class GraphSearchTest extends SearchRelatedTest {
         graphIndexer.commit();
         List<VertexSearchResult> searchResults = graphSearch.searchSchemasOwnVerticesAndPublicOnesForAutoCompletionByLabel(
                 "schema",
-                user
+                userGraph.user()
         );
         VertexSearchResult result = searchResults.get(0);
         Map<URI, GraphElementPojo> properties = result.getProperties();
@@ -295,7 +295,7 @@ public class GraphSearchTest extends SearchRelatedTest {
         graphIndexer.commit();
         searchResults = graphSearch.searchSchemasOwnVerticesAndPublicOnesForAutoCompletionByLabel(
                 "schema",
-                user
+                userGraph.user()
         );
         result = searchResults.get(0);
         properties = result.getProperties();
@@ -308,6 +308,41 @@ public class GraphSearchTest extends SearchRelatedTest {
         );
         assertTrue(
                 properties.containsKey(property2.uri())
+        );
+    }
+
+    @Test
+    public void can_search_schema_property(){
+        SchemaOperator schema = createSchema(userGraph.user());
+        schema.label("schema1");
+        graphIndexer.indexSchema(
+                userGraph.schemaPojoWithUri(
+                        schema.uri()
+                )
+        );
+        graphIndexer.commit();
+        assertTrue(
+                graphSearch.searchRelationsPropertiesOrSchemasForAutoCompletionByLabel(
+                        "prop",
+                        userGraph.user()
+                ).isEmpty()
+        );
+        GraphElementOperator property1 = schema.addProperty();
+        property1.label("prop1");
+        GraphElementOperator property2 = schema.addProperty();
+        property2.label("prop2");
+        graphIndexer.indexSchema(
+                userGraph.schemaPojoWithUri(
+                        schema.uri()
+                )
+        );
+        graphIndexer.commit();
+        assertThat(
+                graphSearch.searchRelationsPropertiesOrSchemasForAutoCompletionByLabel(
+                        "prop",
+                        userGraph.user()
+                ).size(),
+                is(1)
         );
     }
 

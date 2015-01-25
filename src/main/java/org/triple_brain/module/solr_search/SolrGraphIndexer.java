@@ -11,7 +11,9 @@ import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.CoreContainer;
 import org.triple_brain.module.model.FriendlyResource;
 import org.triple_brain.module.model.WholeGraph;
+import org.triple_brain.module.model.graph.FriendlyResourcePojo;
 import org.triple_brain.module.model.graph.GraphElement;
+import org.triple_brain.module.model.graph.GraphElementPojo;
 import org.triple_brain.module.model.graph.edge.Edge;
 import org.triple_brain.module.model.graph.edge.EdgeOperator;
 import org.triple_brain.module.model.graph.schema.SchemaOperator;
@@ -101,6 +103,7 @@ public class SolrGraphIndexer implements GraphIndexer {
         document.addField("is_vertex", false);
         document.addField("is_schema", false);
         document.addField("is_relation", true);
+        //        document.addField("is_schema_property", true);
         document.addField(
                 "source_vertex_uri",
                 encodeURL(edge.sourceVertex().uri())
@@ -117,6 +120,7 @@ public class SolrGraphIndexer implements GraphIndexer {
         document.addField("is_vertex", true);
         document.addField("is_schema", false);
         document.addField("is_relation", false);
+        //        document.addField("is_schema_property", true);
         document.addField("is_public", vertex.isPublic());
         return document;
     }
@@ -126,11 +130,28 @@ public class SolrGraphIndexer implements GraphIndexer {
         document.addField("is_vertex", false);
         document.addField("is_schema", true);
         document.addField("is_relation", false);
+//        document.addField("is_schema_property", true);
         document.addField("is_public", true);
         document.addField(
                 "properties",
                 GraphElementJson.multipleToJson(schema.getProperties())
         );
+        for(GraphElementPojo property: schema.getProperties().values()){
+            document.addField(
+                    "property_label",
+                    property.label().toLowerCase()
+            );
+        }
+        return document;
+    }
+
+    private SolrInputDocument schemaPropertyDocument(FriendlyResourcePojo schemaProperty) {
+        SolrInputDocument document = friendlyResourceToDocument(schemaProperty);
+        document.addField("is_vertex", false);
+        document.addField("is_schema", false);
+        document.addField("is_relation", false);
+//        document.addField("is_schema_property", true);
+        document.addField("is_public", true);
         return document;
     }
 

@@ -11,7 +11,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.triple_brain.module.model.graph.schema.SchemaOperator;
 import org.triple_brain.module.model.graph.vertex.Vertex;
-import org.triple_brain.module.search.EdgeSearchResult;
 import org.triple_brain.module.search.GraphElementSearchResult;
 import org.triple_brain.module.search.GraphSearch;
 import org.triple_brain.module.search.VertexSearchResult;
@@ -95,14 +94,14 @@ public class GraphIndexerTest extends SearchRelatedTest {
     @Test
     public void edges_are_indexed_when_indexing_whole_graph(){
         GraphSearch graphSearch = SolrGraphSearch.withCoreContainer(coreContainer);
-        List<GraphElementSearchResult> results = graphSearch.searchRelationsOrSchemasForAutoCompletionByLabel(
+        List<GraphElementSearchResult> results = graphSearch.searchRelationsPropertiesOrSchemasForAutoCompletionByLabel(
                 "between vert",
                 user
         );
         assertTrue(results.isEmpty());
         graphIndexer.indexWholeGraph();
         graphIndexer.commit();
-        results = graphSearch.searchRelationsOrSchemasForAutoCompletionByLabel(
+        results = graphSearch.searchRelationsPropertiesOrSchemasForAutoCompletionByLabel(
                 "between vert",
                 user
         );
