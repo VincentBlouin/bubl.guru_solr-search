@@ -103,7 +103,6 @@ public class SolrGraphIndexer implements GraphIndexer {
         document.addField("is_vertex", false);
         document.addField("is_schema", false);
         document.addField("is_relation", true);
-        //        document.addField("is_schema_property", true);
         document.addField(
                 "source_vertex_uri",
                 encodeURL(edge.sourceVertex().uri())
@@ -120,7 +119,6 @@ public class SolrGraphIndexer implements GraphIndexer {
         document.addField("is_vertex", true);
         document.addField("is_schema", false);
         document.addField("is_relation", false);
-        //        document.addField("is_schema_property", true);
         document.addField("is_public", vertex.isPublic());
         return document;
     }
@@ -130,29 +128,28 @@ public class SolrGraphIndexer implements GraphIndexer {
         document.addField("is_vertex", false);
         document.addField("is_schema", true);
         document.addField("is_relation", false);
-//        document.addField("is_schema_property", true);
         document.addField("is_public", true);
         document.addField(
                 "properties",
                 GraphElementJson.multipleToJson(schema.getProperties())
         );
+        if(schema.hasProperties()){
+            indexSchemaPropertiesLabel(
+                    schema,
+                    document
+            );
+        }
+
+        return document;
+    }
+
+    private void indexSchemaPropertiesLabel(SchemaPojo schema, SolrInputDocument document){
         for(GraphElementPojo property: schema.getProperties().values()){
             document.addField(
                     "property_label",
                     property.label().toLowerCase()
             );
         }
-        return document;
-    }
-
-    private SolrInputDocument schemaPropertyDocument(FriendlyResourcePojo schemaProperty) {
-        SolrInputDocument document = friendlyResourceToDocument(schemaProperty);
-        document.addField("is_vertex", false);
-        document.addField("is_schema", false);
-        document.addField("is_relation", false);
-//        document.addField("is_schema_property", true);
-        document.addField("is_public", true);
-        return document;
     }
 
     private void indexAllVertices() {
