@@ -35,10 +35,10 @@ public class SolrGraphSearch implements GraphSearch {
     }
 
     @Override
-    public List<VertexSearchResult> searchSchemasOwnVerticesAndPublicOnesForAutoCompletionByLabel(String label, User user) {
+    public List<VertexSearchResult> searchSchemasOwnVerticesAndPublicOnesForAutoCompletionByLabel(String searchTerm, User user) {
         return SearchToPojoConverter.verticesSearchResultFromDocuments(
                 autoCompletionForPublicOrPrivate(
-                        label,
+                        searchTerm,
                         user,
                         "(is_vertex:true OR is_schema:true)"
                 )
@@ -57,10 +57,10 @@ public class SolrGraphSearch implements GraphSearch {
     }
 
     @Override
-    public List<VertexSearchResult> searchOnlyForOwnVerticesForAutoCompletionByLabel(String label, User user) {
+    public List<VertexSearchResult> searchOnlyForOwnVerticesForAutoCompletionByLabel(String searchTerm, User user) {
         return SearchToPojoConverter.verticesSearchResultFromDocuments(
                 autoCompletionForPrivate(
-                        label,
+                        searchTerm,
                         user,
                         "is_vertex:true"
                 )
@@ -68,10 +68,10 @@ public class SolrGraphSearch implements GraphSearch {
     }
 
     @Override
-    public List<GraphElementSearchResult> searchRelationsPropertiesOrSchemasForAutoCompletionByLabel(String label, User user) {
+    public List<GraphElementSearchResult> searchRelationsPropertiesOrSchemasForAutoCompletionByLabel(String searchTerm, User user) {
         return SearchToPojoConverter.edgesSearchResultFromDocuments(
                 autoCompletionForPrivate(
-                        label,
+                        searchTerm,
                         user,
                         "(is_relation:true OR is_schema:true)"
                 )
