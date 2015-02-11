@@ -6,7 +6,6 @@ package org.triple_brain.module.solr_search;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import org.triple_brain.module.model.graph.FriendlyResourcePojo;
 import org.triple_brain.module.model.graph.GraphElement;
 import org.triple_brain.module.model.graph.GraphElementOperator;
 import org.triple_brain.module.model.graph.GraphElementPojo;
@@ -207,7 +206,7 @@ public class GraphSearchTest extends SearchRelatedTest {
     @Test
     public void can_search_by_uri() {
         indexGraph();
-        GraphElementSearchResult searchResult = graphSearch.getByUri(
+        GraphElementSearchResult searchResult = graphSearch.getDetails(
                 vertexA.uri(),
                 user
         );

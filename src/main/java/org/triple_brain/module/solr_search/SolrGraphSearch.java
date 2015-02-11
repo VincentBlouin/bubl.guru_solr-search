@@ -79,7 +79,7 @@ public class SolrGraphSearch implements GraphSearch {
     }
 
     @Override
-    public GraphElementSearchResult getByUri(URI uri, User user) {
+    public GraphElementSearchResult getDetails(URI uri, User user) {
         try {
             SolrServer solrServer = searchUtils.getServer();
             SolrQuery solrQuery = new SolrQuery();
